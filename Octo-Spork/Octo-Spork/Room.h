@@ -2,15 +2,19 @@
 #include <string>
 
 #include "Item.h"
-#include "Interactable.h"
 
-struct Room : public Interactable
+struct Room
 {
+public:
+	std::string Name;
 	Item RoomItem;
 
-public:
 	Room();
 	Room(std::string name);
 
 	void SetItem(Item item);
+	std::string GetDescription();
+
+private:
+	int GetRndIndex(int max);
 };

@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Models">
       <UniqueIdentifier>{3edda81b-9ea4-4d72-9966-6366feebc0c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Enums">
+      <UniqueIdentifier>{abfee396-8551-4486-b29a-af40ac6100f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -30,9 +33,6 @@
     <ClCompile Include="Item.cpp">
       <Filter>Source Files\Models</Filter>
     </ClCompile>
-    <ClCompile Include="Interactable.cpp">
-      <Filter>Source Files\Models</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Item.h">
@@ -41,8 +41,8 @@
     <ClInclude Include="Room.h">
       <Filter>Header Files\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Interactable.h">
-      <Filter>Header Files\Models</Filter>
+    <ClInclude Include="Outcomes.h">
+      <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

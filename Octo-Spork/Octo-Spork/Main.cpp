@@ -3,6 +3,7 @@
 #include <locale>
 #include <array>
 
+#include "Outcomes.h"
 #include "Item.h"
 #include "Room.h"
 
@@ -12,31 +13,36 @@ string GetExpectedInput(string results[]);
 string GetInput();
 void DisplayInfo(string message);
 void InitBuilding();
+void InfoBuffer();
+void PlayGame();
 
 static Room ActiveRoom;
 static std::array<Room, 2> AllRooms;
 
 int main(int arc, char* argv[])
 {
+	// Initialize all rooms, items before starting any gameplay
 	InitBuilding();
 
-	for (int i = 0; i < AllRooms.size(); i++)
-	{
-		std::cout << "Room: " << AllRooms[i].Name << std::endl;
-		std::cout << "Room: " << AllRooms[i].GetDescription() << std::endl;
-	}
-
+	PlayGame();
 	return 0;
+}
 
+/* Begin playing Octo-Spork, main entry */
+void PlayGame()
+{
+	DisplayInfo("Welcome to Octo-Spork!");
+	DisplayInfo("Created by Josh Shepherd (1700471)");
+	InfoBuffer();
 
-	DisplayInfo("You are stood in a hallway. There are two other hallways. Both in front of you to your left and to your right");
+	DisplayInfo("You awaken on the floor of a cold, damp and dilapidated structure. You're feeling dazed, a little confused with a slight pain in the back of your head");
+	DisplayInfo("As you stand up, you notice you're stood in the middle of a hallway.");
+	DisplayInfo("There are two other hallways. Both in front of you to your left and to your right");
 	DisplayInfo("What will you do?");
-	
-	string expected[] = { "Yes", "No" };
+
+	string expected[] = { "walk left", "walk right" };
 	string input = GetExpectedInput(expected);
 	DisplayInfo("Resp: " + input);
-
-	return 0;
 }
 
 /* Creates the buildings rooms, items, etc */
@@ -53,6 +59,11 @@ void InitBuilding()
 	AllRooms = {
 		mi034, mi035
 	};
+}
+
+inline void InfoBuffer()
+{
+	cout << std::endl << std::endl;
 }
 
 inline void DisplayInfo(string message)
@@ -78,8 +89,8 @@ string GetExpectedInput(string results[])
 	{
 		cin >> input;
 
-		index = 0;
-		for (index = 0; index < sizeof(results); index++)
+		index =  0;
+		for (index = 0; index < results->size(); index++)
 		{
 			if (input == results[index]) {
 				hasExpected = true;
