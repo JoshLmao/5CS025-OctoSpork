@@ -1,12 +1,14 @@
 #pragma once
 #include <string>
 
-class Item
+#include "Interactable.h"
+
+class Item : public Interactable
 {
 public:
-	std::string DisplayName;
-	
+
 	Item();
-	Item(std::string displayName);
-	std::string Use();
+	Item(std::string name);
+
+	void Use();
 };

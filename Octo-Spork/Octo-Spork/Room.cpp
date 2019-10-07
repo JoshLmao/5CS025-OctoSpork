@@ -2,8 +2,17 @@
 #include "Item.h"
 #include "Room.h"
 
-Room::Room(std::string name, Item items[])
+Room::Room()
 {
-	DisplayName = name;
-	*Items = *items;
+
+}
+
+Room::Room(std::string name) : Interactable::Interactable(name)
+{
+	Name = name;
+}
+
+void Room::SetItem(Item item)
+{
+	RoomItem = item;
 }

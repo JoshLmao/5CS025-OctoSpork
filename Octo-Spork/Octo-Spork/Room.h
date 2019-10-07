@@ -1,12 +1,16 @@
 #pragma once
 #include <string>
+
 #include "Item.h"
+#include "Interactable.h"
 
-class Room
+struct Room : public Interactable
 {
-public:
-	std::string DisplayName;
-	Item Items[];
+	Item RoomItem;
 
-	Room(std::string name, Item items[]);
+public:
+	Room();
+	Room(std::string name);
+
+	void SetItem(Item item);
 };

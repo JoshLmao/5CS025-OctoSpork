@@ -1,17 +1,16 @@
 #include <string>
+
 #include "Item.h"
+#include "Interactable.h"
 
-Item::Item() 
+Item::Item() { }
+
+Item::Item(std::string name) : Interactable::Interactable(name)
 {
-
+	Name = name;
 }
 
-Item::Item(std::string displayName)
+void Item::Use()
 {
-	DisplayName = displayName;
-}
 
-std::string Item::Use()
-{
-	return DisplayName;
 }
