@@ -128,8 +128,9 @@
     <ClCompile Include="Room.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Direction.h" />
     <ClInclude Include="Item.h" />
-    <ClInclude Include="Outcomes.h" />
+    <ClInclude Include="Function.h" />
     <ClInclude Include="Room.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

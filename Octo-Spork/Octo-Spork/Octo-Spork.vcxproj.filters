@@ -41,7 +41,10 @@
     <ClInclude Include="Room.h">
       <Filter>Header Files\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Outcomes.h">
+    <ClInclude Include="Function.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Direction.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>

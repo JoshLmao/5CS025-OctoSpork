@@ -1,20 +1,31 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <locale>
 #include <array>
 
-#include "Outcomes.h"
+#include "Function.h"
+#include "Direction.h"
 #include "Item.h"
 #include "Room.h"
 
-using namespace std;
 
-string GetExpectedInput(string results[]);
-string GetInput();
-void DisplayInfo(string message);
+struct Instruction {
+	Function Function;
+	Direction Direction;
+	std::string GoalName;
+};
+
+
+std::string GetInput();
+Instruction ReadUser();
+void DisplayInfo(std::string message);
 void InitBuilding();
 void InfoBuffer();
 void PlayGame();
+Function DetermineFunction(std::string input);
+Direction DetermineDirection(std::string input);
+std::string DetermineGoal(std::string input);
 
 static Room ActiveRoom;
 static std::array<Room, 2> AllRooms;
@@ -40,9 +51,7 @@ void PlayGame()
 	DisplayInfo("There are two other hallways. Both in front of you to your left and to your right");
 	DisplayInfo("What will you do?");
 
-	string expected[] = { "walk left", "walk right" };
-	string input = GetExpectedInput(expected);
-	DisplayInfo("Resp: " + input);
+	Instruction inst = ReadUser();
 }
 
 /* Creates the buildings rooms, items, etc */
@@ -63,42 +72,73 @@ void InitBuilding()
 
 inline void InfoBuffer()
 {
-	cout << std::endl << std::endl;
+	std::cout << std::endl << std::endl;
 }
 
-inline void DisplayInfo(string message)
+inline void DisplayInfo(std::string message)
 {
-	std::cout << message << std::endl;
+	std::cout << "> " << message << std::endl;
 }
 
 /* Gets the user's input and returns it */
-string GetInput()
+std::string GetInput()
 {
-	string input;
-	cin >> input;
+	std::string input;
+	std::getline(std::cin, input);
 	return input;
 }
 
-/* Repeatedly asks for input from the user until recieving a response that is in 'results[]' */
-string GetExpectedInput(string results[])
+/* Parses the user's input and returns a set of instructions of where the user wants to go */
+Instruction ReadUser()
 {
-	string input;
-	bool hasExpected = false;
-	int index = 0;
-	while (!hasExpected)
+	bool validInput = false;
+	Instruction inst;
+	while (!validInput)
 	{
-		cin >> input;
-
-		index =  0;
-		for (index = 0; index < results->size(); index++)
-		{
-			if (input == results[index]) {
-				hasExpected = true;
-				break;
-			}
+		std::string input = GetInput();
+		inst.Function = DetermineFunction(input);
+		inst.Direction = DetermineDirection(input);
+		if (inst.Function == FUNCTION_USE || inst.Function == FUNCTION_WALK) {
+			inst.GoalName = DetermineGoal(input);
 		}
-		if (!hasExpected)
-			DisplayInfo("Unexpect input. Try again!");
+
+		validInput = inst.Function != FUNCTION_NONE;
 	}
-	return results[index];
+	return inst;
+}
+
+Function DetermineFunction(std::string input)
+{
+	if (input.find("walk")) {
+		return FUNCTION_WALK;
+	} else if (input.find("use")) {
+		return FUNCTION_USE;
+	} else if (input.find("enter")) {
+		return FUNCTION_ENTER;
+	} else {
+		return FUNCTION_NONE;
+	}
+}
+
+Direction DetermineDirection(std::string input)
+{
+	if (input.find("left")) {
+		return DIRECTION_LEFT;
+	} else if (input.find("right")) {
+		return DIRECTION_RIGHT;
+	} else if (input.find("forward") || input.find("front")) {
+		return DIRECTION_FORWARD;
+	} else if (input.find("backward") || input.find("back")) {
+		return DIRECTION_BACKWARD;
+	} else {
+		return DIRECTION_NONE;
+	}
+}
+
+std::string DetermineGoal(std::string input) 
+{
+	int n = 2;
+	std::istringstream iss(input);
+	while (n-- > 0 && (iss >> input));
+	return input;
 }
