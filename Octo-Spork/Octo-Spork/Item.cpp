@@ -30,7 +30,7 @@ std::string Item::GetDescription()
 		"Ah. It's only a ",
 	};
 
-	return phrases[GetRndIndex(phrases.size())] + Name;
+	return phrases[GetRndIndex((unsigned int)phrases.size())] + Name;
 }
 
 int Item::GetRndIndex(int max)

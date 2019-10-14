@@ -30,7 +30,7 @@ std::string Room::GetDescription()
 		"You entered. Infront of you is a massive sign that says ",
 	};
 
-	return phrases[GetRndIndex(phrases.size())] + Name;
+	return phrases[GetRndIndex((unsigned int)phrases.size())] + Name;
 }
 
 int Room::GetRndIndex(int max) 

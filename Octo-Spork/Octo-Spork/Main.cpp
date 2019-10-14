@@ -14,9 +14,15 @@ void DisplayInfo(std::string message);
 void InitBuilding();
 void InfoBuffer();
 void PlayGame();
+void UpdateState(Input::Instruction usrInstruction);
+int FindRoomIndex(std::string roomName);
 
-static Room ActiveRoom;
-static std::array<Room, 2> AllRooms;
+const int ROOM_COUNT = 10;
+
+//static Room ActiveRoom;
+static std::array<Room, ROOM_COUNT> AllRooms;
+
+int m_roomIndex = 0;
 
 int main(int arc, char* argv[])
 {
@@ -38,8 +44,12 @@ void PlayGame()
 	DisplayInfo("As you stand up, you notice you're stood in the middle of a hallway.");
 	DisplayInfo("There are two other hallways. Both in front of you to your left and to your right");
 	DisplayInfo("What will you do?");
-
-	Input::Instruction inst = Input::ReadUser();
+	
+	while (true)
+	{
+		Input::Instruction inst = Input::ReadUser();
+		UpdateState(inst);
+	}
 }
 
 /* Creates the buildings rooms, items, etc */
@@ -53,8 +63,17 @@ void InitBuilding()
 	Item candle = Item("Candle");
 	mi035.SetItem(candle);
 
+	Room hallway = Room("Main Hall");
+	hallway.Exits = { "North Hallway", "West Hallway", "Staircase" };
+
+	Room nHallway = Room("North Hallway");
+	nHallway.Exits = { "Main Hall", "MI034" };
+
+	Room eHallway = Room("East Hallway");
+	eHallway.Exits = { "North Hallway", "MI035" };
+
 	AllRooms = {
-		mi034, mi035
+		hallway, mi034, mi035
 	};
 }
 
@@ -66,4 +85,26 @@ inline void InfoBuffer()
 inline void DisplayInfo(std::string message)
 {
 	std::cout << "> " << message << std::endl;
+}
+
+void UpdateState(Input::Instruction usrInstruction)
+{
+	for (int i = 0; i < AllRooms[m_roomIndex].Exits.size(); i++)
+	{
+		if (AllRooms[m_roomIndex].Exits[i] == usrInstruction.Goal)
+		{
+			m_roomIndex = FindRoomIndex(usrInstruction.Goal);
+		}
+	}
+}
+
+int FindRoomIndex(std::string roomName)
+{
+	for (int i = 0; i < AllRooms.size(); i++)
+	{
+		if (AllRooms[i].Name == roomName)
+		{
+			return i;
+		}
+	}
 }
