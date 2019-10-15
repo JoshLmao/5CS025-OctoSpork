@@ -8,13 +8,12 @@
 
 Room::Room() 
 {
-	srand((unsigned int)time(0));
 }
 
-Room::Room(std::string name)
+Room::Room(std::string name, std::string desc)
 {
 	Name = name;
-	srand((unsigned int)time(0));
+	m_description = desc;
 }
 
 void Room::SetItem(Item item)
@@ -24,16 +23,20 @@ void Room::SetItem(Item item)
 
 std::string Room::GetDescription()
 {
-	std::array<std::string, 3> phrases = {
-		"You walk into ",
-		"You stroll on into ",
-		"You entered. Infront of you is a massive sign that says ",
-	};
-
-	return phrases[GetRndIndex((unsigned int)phrases.size())] + Name;
+	return m_description;
 }
 
-int Room::GetRndIndex(int max) 
+std::string Room::GetInfo()
 {
-	return rand() % max;
+	std::string header = "> " + Name;
+	std::string separator = "> - - - - - - ";
+	std::string desc = "> " + m_description;
+	std::string items = "> Items: " + RoomItem.Name;
+	std::string exits = "> Exits: ";
+	for (int i = 0; i < Exits.size(); i++) {
+		exits += Exits[i];
+		if (i < Exits.size() - 1)
+			exits += ", ";
+	}
+	return header + "\n" + separator + "\n" + desc + "\n" + items + "\n" + exits + "\n";
 }

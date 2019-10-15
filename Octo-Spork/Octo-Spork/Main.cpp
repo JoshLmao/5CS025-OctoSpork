@@ -12,10 +12,11 @@
 
 void DisplayInfo(std::string message);
 void InitBuilding();
-void InfoBuffer();
+void InfoBuffer(int count = 1);
 void PlayGame();
 void UpdateState(Input::Instruction usrInstruction);
 int FindRoomIndex(std::string roomName);
+void PrintRoomInfo(Room r);
 
 const int ROOM_COUNT = 10;
 
@@ -38,15 +39,18 @@ void PlayGame()
 {
 	DisplayInfo("Welcome to Octo-Spork!");
 	DisplayInfo("Created by Josh Shepherd (1700471)");
+	InfoBuffer(2);
+
+	// Introduction
+	DisplayInfo(" - Introduction - ");
+	DisplayInfo("You awaken on the floor of a cold, damp and dilapidated structure. You're feeling dazed, a little confused with a slight pain in the back of your head");
+	DisplayInfo("As you stand up, you notice you're stood inside a massive, abandoned facility. Scanning the room, you see a sign that says 'Main Hall'");
 	InfoBuffer();
 
-	DisplayInfo("You awaken on the floor of a cold, damp and dilapidated structure. You're feeling dazed, a little confused with a slight pain in the back of your head");
-	DisplayInfo("As you stand up, you notice you're stood in the middle of a hallway.");
-	DisplayInfo("There are two other hallways. Both in front of you to your left and to your right");
-	DisplayInfo("What will you do?");
-	
 	while (true)
 	{
+		PrintRoomInfo(AllRooms[m_roomIndex]);
+		DisplayInfo("What will you do?");
 		Input::Instruction inst = Input::ReadUser();
 		UpdateState(inst);
 	}
@@ -55,31 +59,35 @@ void PlayGame()
 /* Creates the buildings rooms, items, etc */
 void InitBuilding()
 {
-	Room mi034 = Room("MI034");
+	Room mainHall = Room("Main-Hall", "Where I woke up. There's a massive sign on the wall with it's name");
+	mainHall.Exits = { "North-Hallway", "West-Hallway", "Staircase" };
+
+	Room nHallway = Room("North-Hallway", "Long hallway");
+	nHallway.Exits = { "Main-Hall", "MI034" };
+
+	Room eHallway = Room("East-Hallway", "Hidden in the back of the complex");
+	eHallway.Exits = { "North-Hallway", "MI035" };
+
+	Room mi034 = Room("MI034", "A room");
 	Item mouse = Item("Mouse");
 	mi034.SetItem(mouse);
 
-	Room mi035 = Room("MI035");
+	Room mi035 = Room("MI035", "Description");
 	Item candle = Item("Candle");
 	mi035.SetItem(candle);
 
-	Room hallway = Room("Main Hall");
-	hallway.Exits = { "North Hallway", "West Hallway", "Staircase" };
-
-	Room nHallway = Room("North Hallway");
-	nHallway.Exits = { "Main Hall", "MI034" };
-
-	Room eHallway = Room("East Hallway");
-	eHallway.Exits = { "North Hallway", "MI035" };
-
 	AllRooms = {
-		hallway, mi034, mi035
+		mainHall, nHallway, eHallway, mi034, mi035
 	};
 }
 
-inline void InfoBuffer()
+void InfoBuffer(int count)
 {
-	std::cout << std::endl << std::endl;
+	std::string el;
+	for (int i = 0; i < count; i++) {
+		el += "\n";
+	}
+	std::cout << el;
 }
 
 inline void DisplayInfo(std::string message)
@@ -94,6 +102,7 @@ void UpdateState(Input::Instruction usrInstruction)
 		if (AllRooms[m_roomIndex].Exits[i] == usrInstruction.Goal)
 		{
 			m_roomIndex = FindRoomIndex(usrInstruction.Goal);
+			break;
 		}
 	}
 }
@@ -107,4 +116,9 @@ int FindRoomIndex(std::string roomName)
 			return i;
 		}
 	}
+}
+
+void PrintRoomInfo(Room r)
+{
+	std::cout << r.GetInfo();
 }
