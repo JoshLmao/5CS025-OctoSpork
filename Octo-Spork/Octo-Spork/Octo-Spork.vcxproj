@@ -129,7 +129,6 @@
     <ClCompile Include="Room.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Direction.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Function.h" />

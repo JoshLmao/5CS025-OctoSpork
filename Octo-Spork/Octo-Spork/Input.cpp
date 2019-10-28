@@ -12,7 +12,6 @@ Input::Instruction Input::ReadUser()
 	{
 		std::string input = GetInput();
 		inst.Function = DetermineFunction(input);
-		inst.Direction = DetermineDirection(input);
 		if (inst.Function == FUNCTION_USE || inst.Function == FUNCTION_WALK) {
 			inst.Goal = DetermineGoal(input);
 		}
@@ -41,27 +40,14 @@ Function Input::DetermineFunction(std::string input)
 	else if (input.find("enter")) {
 		return FUNCTION_ENTER;
 	}
+	else if (input.find("view inventory")) {
+		return FUNCTION_VIEW_INVENTORY;
+	}
+	else if (input.find("talk")) {
+		return FUNCTION_TALK;
+	}
 	else {
 		return FUNCTION_NONE;
-	}
-}
-
-Direction Input::DetermineDirection(std::string input)
-{
-	if (input.find("left")) {
-		return DIRECTION_LEFT;
-	}
-	else if (input.find("right")) {
-		return DIRECTION_RIGHT;
-	}
-	else if (input.find("forward") || input.find("front")) {
-		return DIRECTION_FORWARD;
-	}
-	else if (input.find("backward") || input.find("back")) {
-		return DIRECTION_BACKWARD;
-	}
-	else {
-		return DIRECTION_NONE;
 	}
 }
 
