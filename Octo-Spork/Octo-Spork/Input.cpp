@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <locale>
 
 #include "Input.h"
 
@@ -31,19 +32,25 @@ std::string Input::GetInput()
 
 Function Input::DetermineFunction(std::string input)
 {
-	if (input.find("walk")) {
+	// Convert to lower case for expected comparisons
+	std::string lower = "";
+	std::locale loc;
+	for (int i = 0; i < input.length(); i++)
+		lower += std::tolower(input[i], loc);
+
+	if (lower.find("walk")) {
 		return FUNCTION_WALK;
 	}
-	else if (input.find("use")) {
+	else if (lower.find("use")) {
 		return FUNCTION_USE;
 	}
-	else if (input.find("enter")) {
+	else if (lower.find("enter")) {
 		return FUNCTION_ENTER;
 	}
-	else if (input.find("view inventory")) {
+	else if (lower.find("view inventory")) {
 		return FUNCTION_VIEW_INVENTORY;
 	}
-	else if (input.find("talk")) {
+	else if (lower.find("talk")) {
 		return FUNCTION_TALK;
 	}
 	else {
