@@ -1,4 +1,5 @@
 #include "NPC.h"
+#include "Utils.h"
 
 NPC::NPC()
 {
@@ -18,6 +19,7 @@ NPC::NPC()
 	m_hasGreeted = false;
 	m_hasRequiredItem = false;
 	m_interactCount = 0;
+	m_attemptedItem = "";
 }
 
 NPC::NPC(NPCConfig config)
@@ -27,26 +29,32 @@ NPC::NPC(NPCConfig config)
 	m_hasGreeted = false;
 	m_hasRequiredItem = false;
 	m_interactCount = 0;
+	m_attemptedItem = "";
 }
 
 std::string NPC::GetSpeech()
 {
 	m_interactCount++;
 
-	if (m_interactCount >= m_config.ExcessiveLimitCount)
-	{
-		return m_config.ExcessiveResponse;
-	}
-
 	// First time user has met NPC
 	if (!m_hasGreeted) {
-		m_hasGreeted = 1;
+		m_hasGreeted = true;
 		return m_config.Greeting;
 	}
 
-	// User given item to NPC.
-	if (m_hasRequiredItem) {
-		return m_config.HasItemResponse;
+	// User tried giving NPC an item
+	if (m_attemptedItem != "") {
+		m_attemptedItem = "";
+		if (m_hasRequiredItem) {
+			return m_config.HasItemResponse;
+		} else {
+			return m_config.IncorrectItemResponse;
+		}
+	}
+
+	// Is NPC is annoyed with Player
+	if (IsAnnoyed()) {
+		return m_config.ExcessiveResponse;
 	}
 
 	return m_config.StandardResponse;
@@ -54,10 +62,11 @@ std::string NPC::GetSpeech()
 
 bool NPC::GiveItem(std::string itemName)
 {
-	if (IsAnnoyed())
-		return false;
+	if (m_hasRequiredItem)
+		return true;
 
-	if (itemName == m_config.RequiredItemName || m_hasRequiredItem) {
+	m_attemptedItem = itemName;
+	if (Utils::ToLower(m_attemptedItem) == Utils::ToLower(m_config.RequiredItemName)) {
 		m_hasRequiredItem = true;
 		return true;
 	}

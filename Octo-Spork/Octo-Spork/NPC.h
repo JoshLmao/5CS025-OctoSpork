@@ -41,6 +41,9 @@ public:
 private:
 	NPCConfig m_config;
 
+	/* Name of item attempted to be given to the NPC */
+	std::string m_attemptedItem;
+
 	/* Has the NPC greeted the player before */
 	bool m_hasGreeted;
 	/* Does the NPC has the item it needs from the Player */

@@ -89,6 +89,8 @@ void InitBuilding()
 	// Floor 1
 	Room mainHall = Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name");
 	mainHall.Exits = { "North Hallway", "Staircase" };
+	Item example = Item("Example Item");
+	mainHall.SetItem(example);
 
 	Room nHallway = Room("North Hallway", "Long hallway");
 	nHallway.Exits = { "Main Hall", "East Hallway", "MI034" };
@@ -105,12 +107,13 @@ void InitBuilding()
 	
 	NPCConfig govrConfig = NPCConfig();
 	govrConfig.Name = "Ghost of VR";
-	govrConfig.RequiredItemName = "Valve Index";
+	govrConfig.RequiredItemName = "Example Item";
 	govrConfig.Greeting = "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?";
 	govrConfig.StandardResponse = "Please, wanderer. Can you free me from this room? I have been here for 500 years now. ";
 	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often?";
 	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace";
 	govrConfig.CompleteResponse = "You have served me well. Now go, let me play VR";
+	govrConfig.IncorrectItemResponse = "What is this? Don't waste my time with irrelevent things.";
 	govrConfig.ExcessiveLimitCount = 15;
 
 	NPC ghostVR = NPC(govrConfig);
@@ -177,8 +180,7 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_TALK) 
 	{
 		// User talking to an NPC
-		NPC npc = AllRooms[m_roomIndex].RoomNPC;
-		std::string speech = npc.GetSpeech();
+		std::string speech = AllRooms[m_roomIndex].RoomNPC.GetSpeech();
 		DisplayInfo(speech);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_ENTER)
@@ -196,7 +198,6 @@ void UpdateState(Input::Instruction usrInstruction)
 		}
 
 		PrintRoomInfo(AllRooms[m_roomIndex]);
-		InfoBuffer();
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY) 
 	{
@@ -216,6 +217,23 @@ void UpdateState(Input::Instruction usrInstruction)
 		if (msg == "")
 			msg = "You have no items in your inventory.";
 		DisplayInfo(msg);
+	}
+	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
+	{
+		bool result = AllRooms[m_roomIndex].RoomNPC.GiveItem(usrInstruction.Goal);
+		DisplayInfo(AllRooms[m_roomIndex].RoomNPC.GetSpeech());
+	}
+	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
+	{
+		// User picks up an item. 
+		Item itm = AllRooms[m_roomIndex].RoomItem;
+		AllRooms[m_roomIndex].SetItem(Item());
+
+		m_userInventory[0] = itm;
+
+		DisplayInfo("You pick up " + itm.Name);
+		InfoBuffer();
+		PrintRoomInfo(AllRooms[m_roomIndex]);
 	}
 }
 
