@@ -187,7 +187,6 @@ void UpdateState(Input::Instruction usrInstruction)
 
 		InfoBuffer();
 		DisplayInfo("Tip: Remember you can talk to NPCs multiple times for more information");
-		InfoBuffer();
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TALK) 
 	{
@@ -265,5 +264,26 @@ int FindRoomIndex(std::string roomName)
 
 void PrintRoomInfo(Room r)
 {
-	std::cout << r.GetInfo();
+	std::string out = "";
+
+	std::string endl = "\n";
+	out += "> " + r.Name + endl;
+	out += "> - - - - - - " + endl;
+	// Append items if exists
+	if (r.RoomItem.Name != "")
+		out += "> Items: " + r.RoomItem.Name + endl;
+	// Append exists if exists
+	if (r.Exits.size() > 0) {
+		out += "> Exits: ";
+		for (int i = 0; i < r.Exits.size(); i++) {
+			out += r.Exits[i];
+			if (i < r.Exits.size() - 1)
+				out += ", ";
+		}
+		out += endl;
+	}
+	if (r.RoomNPC.GetName() != "")
+		out += "> NPCs: " + r.RoomNPC.GetName() + endl;
+
+	std::cout << out;
 }

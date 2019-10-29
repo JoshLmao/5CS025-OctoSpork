@@ -10,6 +10,7 @@ struct Room
 public:
 	std::string Name;
 	std::array<std::string, 3> Exits;
+	std::string m_description;
 	Item RoomItem;
 	NPC RoomNPC;
 
@@ -27,7 +28,4 @@ public:
 	std::string GetInfo();
 	/* Sets the NPC for this room, limited to only one*/
 	void SetNPC(NPC npc);
-
-private:
-	std::string m_description;
 };
