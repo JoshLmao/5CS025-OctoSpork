@@ -109,7 +109,7 @@ void InitBuilding()
 	govrConfig.Name = "Ghost of VR";
 	govrConfig.RequiredItemName = "Example Item";
 	govrConfig.Greeting = "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?";
-	govrConfig.StandardResponse = "Please, wanderer. Can you free me from this room? I have been here for 500 years now. ";
+	govrConfig.StandardResponse = "Please, wanderer. Can you free me from this room? I have been here for 500 years now.";
 	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often?";
 	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace";
 	govrConfig.CompleteResponse = "You have served me well. Now go, let me play VR";
@@ -173,9 +173,21 @@ inline void Sleep(int ms)
 
 void UpdateState(Input::Instruction usrInstruction)
 {
-	if (usrInstruction.Function == Function::FUNCTION_USE) 
+	if (usrInstruction.Function == Function::FUNCTION_HELP) 
 	{
-		// User trying to use an Item
+		// User asking for help
+		DisplayInfo("Help Commands");
+		DisplayInfo("help - Lists all available commands to use");
+		DisplayInfo("enter 'ROOM' - Used to move from one room to another");
+		DisplayInfo("talk 'NPC' - Talks to an NPC");
+		DisplayInfo("give 'ITEM' - Attempts to give an item to the current NPC in the room");
+		DisplayInfo("take 'ITEM' - Takes an item that is inside the current room");
+		DisplayInfo("view inventory - Lists your current items you're holding");
+		DisplayInfo("view room - Lists the current room's information");
+
+		InfoBuffer();
+		DisplayInfo("Tip: Remember you can talk to NPCs multiple times for more information");
+		InfoBuffer();
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TALK) 
 	{
@@ -197,6 +209,7 @@ void UpdateState(Input::Instruction usrInstruction)
 			}
 		}
 
+		// Print information of new room
 		PrintRoomInfo(AllRooms[m_roomIndex]);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY) 
@@ -218,6 +231,9 @@ void UpdateState(Input::Instruction usrInstruction)
 			msg = "You have no items in your inventory.";
 		DisplayInfo(msg);
 	}
+	else if (usrInstruction.Function == Function::FUNCTION_VIEW_ROOM) {
+		PrintRoomInfo(AllRooms[m_roomIndex]);
+	}
 	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
 	{
 		bool result = AllRooms[m_roomIndex].RoomNPC.GiveItem(usrInstruction.Goal);
@@ -232,8 +248,6 @@ void UpdateState(Input::Instruction usrInstruction)
 		m_userInventory[0] = itm;
 
 		DisplayInfo("You pick up " + itm.Name);
-		InfoBuffer();
-		PrintRoomInfo(AllRooms[m_roomIndex]);
 	}
 }
 

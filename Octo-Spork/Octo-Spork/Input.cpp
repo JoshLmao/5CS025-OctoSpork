@@ -10,14 +10,11 @@ Input::Instruction Input::ReadUser()
 {
 	bool validInput = false;
 	Instruction inst;
-	while (!validInput)
-	{
-		std::string input = GetInput();
-		inst.Function = DetermineFunction(input);
-		inst.Goal = DetermineGoal(input);
+	
+	std::string input = GetInput();
+	inst.Function = DetermineFunction(input);
+	inst.Goal = DetermineGoal(input);
 
-		validInput = inst.Function != FUNCTION_NONE;
-	}
 	return inst;
 }
 
@@ -33,10 +30,7 @@ Function Input::DetermineFunction(std::string input)
 {
 	// Convert to lower case for expected comparisons
 	std::string lower = Utils::ToLower(input);
-	if (lower.find("use") != std::string::npos) {
-		return FUNCTION_USE;
-	}
-	else if (lower.find("enter") != std::string::npos) {
+	if (lower.find("enter") != std::string::npos) {
 		return FUNCTION_ENTER;
 	}
 	else if (lower.find("view inventory") != std::string::npos) {
@@ -50,6 +44,12 @@ Function Input::DetermineFunction(std::string input)
 	}
 	else if (lower.find("take") != std::string::npos) {
 		return FUNCTION_TAKE;
+	}
+	else if (lower.find("help") != std::string::npos || lower.find("?") != std::string::npos) {
+		return FUNCTION_HELP;
+	}
+	else if (lower.find("view room") != std::string::npos) {
+		return FUNCTION_VIEW_ROOM;
 	}
 	else {
 		return FUNCTION_NONE;

@@ -51,10 +51,15 @@ std::string NPC::GetSpeech()
 			return m_config.IncorrectItemResponse;
 		}
 	}
-
+	
 	// Is NPC is annoyed with Player
 	if (IsAnnoyed()) {
 		return m_config.ExcessiveResponse;
+	}
+
+	// If NPC already has item and player tries to talk again
+	if (m_hasRequiredItem) {
+		return m_config.HasItemResponse;
 	}
 
 	return m_config.StandardResponse;
