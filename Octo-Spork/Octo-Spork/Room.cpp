@@ -38,5 +38,11 @@ std::string Room::GetInfo()
 		if (i < Exits.size() - 1)
 			exits += ", ";
 	}
-	return header + "\n" + separator + "\n" + desc + "\n" + items + "\n" + exits + "\n";
+	std::string npcs = "> NPCs: " + RoomNPC.GetName();
+	return header + "\n" + separator + "\n" + desc + "\n" + items + "\n" + exits + "\n" + npcs + "\n";
+}
+
+void Room::SetNPC(NPC npc) 
+{
+	RoomNPC = npc;
 }

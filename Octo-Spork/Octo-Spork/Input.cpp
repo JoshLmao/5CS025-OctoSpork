@@ -1,8 +1,9 @@
 #include <iostream>
 #include <sstream>
-#include <locale>
+
 
 #include "Input.h"
+#include "Utils.h"
 
 /* Parses the user's input and returns a set of instructions of where the user wants to go */
 Input::Instruction Input::ReadUser()
@@ -13,9 +14,7 @@ Input::Instruction Input::ReadUser()
 	{
 		std::string input = GetInput();
 		inst.Function = DetermineFunction(input);
-		if (inst.Function == FUNCTION_USE || inst.Function == FUNCTION_WALK) {
-			inst.Goal = DetermineGoal(input);
-		}
+		inst.Goal = DetermineGoal(input);
 
 		validInput = inst.Function != FUNCTION_NONE;
 	}
@@ -33,25 +32,21 @@ std::string Input::GetInput()
 Function Input::DetermineFunction(std::string input)
 {
 	// Convert to lower case for expected comparisons
-	std::string lower = "";
-	std::locale loc;
-	for (int i = 0; i < input.length(); i++)
-		lower += std::tolower(input[i], loc);
-
-	if (lower.find("walk")) {
-		return FUNCTION_WALK;
-	}
-	else if (lower.find("use")) {
+	std::string lower = Utils::ToLower(input);
+	if (lower.find("use") != std::string::npos) {
 		return FUNCTION_USE;
 	}
-	else if (lower.find("enter")) {
+	else if (lower.find("enter") != std::string::npos) {
 		return FUNCTION_ENTER;
 	}
-	else if (lower.find("view inventory")) {
+	else if (lower.find("view inventory") != std::string::npos) {
 		return FUNCTION_VIEW_INVENTORY;
 	}
-	else if (lower.find("talk")) {
+	else if (lower.find("talk") != std::string::npos) {
 		return FUNCTION_TALK;
+	}
+	else if (lower.find("give")) {
+		return FUNCTION_GIVE;
 	}
 	else {
 		return FUNCTION_NONE;
@@ -60,8 +55,14 @@ Function Input::DetermineFunction(std::string input)
 
 std::string Input::DetermineGoal(std::string input)
 {
-	int n = 2;
-	std::istringstream iss(input);
-	while (n-- > 0 && (iss >> input));
-	return input;
+	std::size_t pos = input.find(" ");
+	if (pos != std::string::npos)
+	{
+		// + 1 to remove white space
+		return input.substr(pos + 1);
+	}
+	else 
+	{
+		return "?";
+	}
 }

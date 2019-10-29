@@ -11,6 +11,7 @@
 #include "Item.h"
 #include "Room.h"
 #include "Input.h"
+#include "Utils.h"
 
 void DisplayInfo(std::string message);
 void InitBuilding();
@@ -21,7 +22,7 @@ int FindRoomIndex(std::string roomName);
 void PrintRoomInfo(Room r);
 void Sleep(int ms);
 
-const int ROOM_COUNT = 10;
+const int ROOM_COUNT = 11;
 const int USER_INVENTORY_SIZE = 4;
 
 /// All rooms containing their items
@@ -51,25 +52,25 @@ void PlayGame()
 	DisplayInfo("Created by Josh Shepherd (1700471)");
 	InfoBuffer(2);
 
-	Sleep(1000);
+	//Sleep(1000);
 
 	// Introduction
 	DisplayInfo(" - Introduction - ");
-	Sleep(2000);
+	//Sleep(2000);
 	DisplayInfo("You awaken on the floor of a cold, damp and dilapidated structure. You're feeling dazed, a little confused with a slight pain in the back of your head");
-	Sleep(4000);
+	//Sleep(4000);
 	DisplayInfo("As you stand up, you notice you're stood inside a massive, abandoned facility. Scanning the room, you see a sign that says 'Main Hall'");
-	Sleep(4000);
+	//Sleep(4000);
 
 	InfoBuffer();
 	
+	PrintRoomInfo(AllRooms[m_roomIndex]);
+	InfoBuffer();
 	while (true)
 	{
-		PrintRoomInfo(AllRooms[m_roomIndex]);
-		InfoBuffer();
-
 		DisplayInfo("What will you do?");
 		Input::Instruction inst = Input::ReadUser();
+		InfoBuffer();
 
 		if (inst.Function != FUNCTION_NONE) {
 			UpdateState(inst);
@@ -86,56 +87,65 @@ void PlayGame()
 void InitBuilding()
 {
 	// Floor 1
-	Room mainHall = Room("Main-Hall", "Where I woke up. There's a massive sign on the wall with it's name");
-	mainHall.Exits = { "North-Hallway", "West-Hallway", "Staircase" };
+	Room mainHall = Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name");
+	mainHall.Exits = { "North Hallway", "Staircase" };
 
-	Room nHallway = Room("North-Hallway", "Long hallway");
-	nHallway.Exits = { "Main-Hall", "MI034" };
+	Room nHallway = Room("North Hallway", "Long hallway");
+	nHallway.Exits = { "Main Hall", "East Hallway", "MI034" };
 
-	Room eHallway = Room("East-Hallway", "Hidden in the back of the complex");
-	eHallway.Exits = { "North-Hallway", "MI035" };
-
-	Room sHallway = Room("South-Hallway", "");
-	sHallway.Exits = { "East-Hallway", "West-Hallway" };
-
-	Room wHallway = Room("West-Hallway", "");
-	wHallway.Exits= { "South-Hallway", "Main-Hall" };
+	Room eHallway = Room("East Hallway", "Hidden in the back of the complex");
+	eHallway.Exits = { "North Hallway", "MI035" };
 
 	// Floor 1 - Rooms
-	Room mi034 = Room("MI034", "A room");
+	// MI034
+	Room mi034 = Room("MI034", "A quiet little room tucked away");
+	mi034.Exits = { "North Hallway", "MI035" };
 	Item mouse = Item("Mouse");
 	mi034.SetItem(mouse);
+	
+	NPCConfig govrConfig = NPCConfig();
+	govrConfig.Name = "Ghost of VR";
+	govrConfig.RequiredItemName = "Valve Index";
+	govrConfig.Greeting = "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?";
+	govrConfig.StandardResponse = "Please, wanderer. Can you free me from this room? I have been here for 500 years now. ";
+	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often?";
+	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace";
+	govrConfig.CompleteResponse = "You have served me well. Now go, let me play VR";
+	govrConfig.ExcessiveLimitCount = 15;
 
+	NPC ghostVR = NPC(govrConfig);
+	mi034.SetNPC(ghostVR);
+
+	// MI035
 	Room mi035 = Room("MI035", "Description");
+	mi035.Exits = { "East Hallway" };
 	Item candle = Item("Candle");
 	mi035.SetItem(candle);
 
 	// Floor 1 to 2 Staircase 
 	Room staircase = Room("Staircase", "");
-	staircase.Exits = { "Main-Hall", "F2-Landing" };
+	staircase.Exits = { "Main Hall", "F2 Landing" };
 
 	// Floor 2
-	Room f2Landing = Room("F2-Landing", "");
-	f2Landing.Exits = { "Staircase", "F2-North-Hallway" };
+	Room f2Landing = Room("F2 Landing", "");
+	f2Landing.Exits = { "Staircase", "F2 North Hallway" };
 
-	Room f2nHallway = Room("F2-North-Hallway", "");
-	f2nHallway.Exits = { "F2-East-Hallway", "F2-Landing", "MI102" };
+	Room f2nHallway = Room("F2 North Hallway", "");
+	f2nHallway.Exits = { "F2 East Hallway", "F2 Landing", "MI102" };
 
-	Room f2eHallway = Room("F2-East-Hallway", "");
-	f2eHallway.Exits = { "F2-North-Hallway", "F2-East-Hallway" };
-
-	Room f2sHallway = Room("F2-South-Hallway", "");
-	f2sHallway.Exits = { "F2-East-Hallway", "F2-North-Hallway" };
+	Room f2eHallway = Room("F2 East Hallway", "");
+	f2eHallway.Exits = { "F2 North Hallway", "F2 East Hallway" };
 
 	// Floor 2 - Rooms
 	Room mi102a = Room("MI102a", "");
-	mi102a.Exits = { "F2-Landing" };
+	mi102a.Exits = { "F2 Landing" };
 
-	Room mi102c = Room("MI102c", "");
-	mi102c.Exits = { "F2-North-Hallway" };
+	Room mi102b = Room("MI102b", "");
+	mi102b.Exits = { "F2 North Hallway" };
+	mi102b.SetItem(Item("Index"));
 
 	AllRooms = {
-		mainHall, nHallway, eHallway, mi034, mi035
+		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102b
 	};
 }
 
@@ -167,21 +177,30 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_TALK) 
 	{
 		// User talking to an NPC
+		NPC npc = AllRooms[m_roomIndex].RoomNPC;
+		std::string speech = npc.GetSpeech();
+		DisplayInfo(speech);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_ENTER)
 	{
 		// User enters new room
-
 		for (int i = 0; i < AllRooms[m_roomIndex].Exits.size(); i++)
 		{
-			if (AllRooms[m_roomIndex].Exits[i] == usrInstruction.Goal)
+			std::string exitLower = Utils::ToLower(AllRooms[m_roomIndex].Exits[i]);
+			std::string goalLower = Utils::ToLower(usrInstruction.Goal);
+			if (exitLower == goalLower)
 			{
-				m_roomIndex = FindRoomIndex(usrInstruction.Goal);
+				m_roomIndex = FindRoomIndex(goalLower);
 				break;
 			}
 		}
+
+		PrintRoomInfo(AllRooms[m_roomIndex]);
+		InfoBuffer();
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY) {
+	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY) 
+	{
+		// User viewing their inventory
 		DisplayInfo("You look through your belongings...");
 
 		std::string msg = "";
@@ -204,7 +223,8 @@ int FindRoomIndex(std::string roomName)
 {
 	for (int i = 0; i < AllRooms.size(); i++)
 	{
-		if (AllRooms[i].Name == roomName)
+		std::string roomLower = Utils::ToLower(AllRooms[i].Name);
+		if (roomLower == roomName)
 		{
 			return i;
 		}
