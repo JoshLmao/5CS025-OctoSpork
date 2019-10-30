@@ -14,26 +14,22 @@ Item::Item(std::string name)
 {
 	srand((unsigned int)time(0));
 
-	Name = name;
+	SetName(name);
 }
 
-void Item::Use()
-{
-
-}
-
-std::string Item::GetDescription()
-{
-	std::array<std::string, 3> phrases = {
-		"It's a shiny ",
-		"You pick up ",
-		"Ah. It's only a ",
-	};
-
-	return phrases[GetRndIndex((unsigned int)phrases.size())] + Name;
-}
 
 int Item::GetRndIndex(int max)
 {
 	return rand() % max;
 }
+
+std::string Item::GetName()
+{
+	return m_name;
+}
+
+void Item::SetName(std::string name)
+{
+	m_name = name;
+}
+

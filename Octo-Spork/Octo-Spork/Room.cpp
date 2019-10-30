@@ -8,17 +8,24 @@
 
 Room::Room() 
 {
+	Name = "Unknown Room";
+	m_description = "Unknown description";
+
+	m_roomItem = nullptr;
+	m_roomNPC = nullptr;
+	m_exits = nullptr;
+	m_exitsSize = 0;
 }
 
 Room::Room(std::string name, std::string desc)
 {
 	Name = name;
 	m_description = desc;
-}
 
-void Room::SetItem(Item item)
-{
-	RoomItem = item;
+	m_roomItem = nullptr;
+	m_roomNPC = nullptr;
+	m_exits = nullptr;
+	m_exitsSize = 0;
 }
 
 std::string Room::GetDescription()
@@ -26,23 +33,38 @@ std::string Room::GetDescription()
 	return m_description;
 }
 
-std::string Room::GetInfo()
+Item* Room::GetItem()
 {
-	std::string header = "> " + Name;
-	std::string separator = "> - - - - - - ";
-	std::string desc = "> " + m_description;
-	std::string items = "> Items: " + RoomItem.Name;
-	std::string exits = "> Exits: ";
-	for (int i = 0; i < Exits.size(); i++) {
-		exits += Exits[i];
-		if (i < Exits.size() - 1)
-			exits += ", ";
-	}
-	std::string npcs = "> NPCs: " + RoomNPC.GetName();
-	return header + "\n" + separator + "\n" + desc + "\n" + items + "\n" + exits + "\n" + npcs + "\n";
+	return m_roomItem;
 }
 
-void Room::SetNPC(NPC npc) 
+void Room::SetItem(Item* item)
 {
-	RoomNPC = npc;
+	m_roomItem = item;
+}
+
+NPC* Room::GetNPC() 
+{
+	return m_roomNPC;
+}
+
+void Room::SetNPC(NPC* npc) 
+{
+	m_roomNPC = npc;
+}
+
+std::string Room::GetExit(int index)
+{
+	return m_exits[index];
+}
+
+int Room::GetExitsSize()
+{
+	return m_exitsSize;
+}
+
+void Room::SetExits(std::string* exitsPtr, int length)
+{
+	m_exits = exitsPtr;
+	m_exitsSize = length;
 }

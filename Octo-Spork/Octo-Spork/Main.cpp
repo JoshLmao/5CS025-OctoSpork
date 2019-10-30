@@ -88,9 +88,12 @@ void InitBuilding()
 {
 	// Floor 1
 	Room mainHall = Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name");
-	mainHall.Exits = { "North Hallway", "Staircase" };
+	std::string exits[2] = { "North Hallway", "Staircase" };
+	mainHall.SetExits(exits, 2);
+	//mainHall.Exits = { "North Hallway", "Staircase" };
+
 	Item example = Item("Example Item");
-	mainHall.SetItem(example);
+	mainHall.SetItem(&example);
 
 	Room nHallway = Room("North Hallway", "Long hallway");
 	nHallway.Exits = { "Main Hall", "East Hallway", "MI034" };
@@ -102,8 +105,8 @@ void InitBuilding()
 	// MI034
 	Room mi034 = Room("MI034", "A quiet little room tucked away");
 	mi034.Exits = { "North Hallway", "MI035" };
-	Item mouse = Item("Mouse");
-	mi034.SetItem(mouse);
+	Item mouse = Item();
+	mi034.SetItem(&mouse);
 	
 	NPCConfig govrConfig = NPCConfig();
 	govrConfig.Name = "Ghost of VR";
@@ -117,13 +120,13 @@ void InitBuilding()
 	govrConfig.ExcessiveLimitCount = 15;
 
 	NPC ghostVR = NPC(govrConfig);
-	mi034.SetNPC(ghostVR);
+	mi034.SetNPC(&ghostVR);
 
 	// MI035
 	Room mi035 = Room("MI035", "Description");
 	mi035.Exits = { "East Hallway" };
-	Item candle = Item("Candle");
-	mi035.SetItem(candle);
+	//Item candle = Item("Candle");
+	//mi035.SetItem(&candle);
 
 	// Floor 1 to 2 Staircase 
 	Room staircase = Room("Staircase", "");
@@ -131,24 +134,27 @@ void InitBuilding()
 
 	// Floor 2
 	Room f2Landing = Room("F2 Landing", "");
-	f2Landing.Exits = { "Staircase", "F2 North Hallway" };
+	f2Landing.Exits = { "Staircase", "F2 North Hallway", "F2 West Hallway" };
 
 	Room f2nHallway = Room("F2 North Hallway", "");
-	f2nHallway.Exits = { "F2 East Hallway", "F2 Landing", "MI102" };
+	f2nHallway.Exits = { "F2 East Hallway", "F2 Landing", "MI102c" };/*"F2 West Hallway"*/
 
 	Room f2eHallway = Room("F2 East Hallway", "");
 	f2eHallway.Exits = { "F2 North Hallway", "F2 East Hallway" };
+
+	Room f2wHallway = Room("F2 West Hallway", "");
+	/*f2wHallway.Exits{ "F2" };*/
 
 	// Floor 2 - Rooms
 	Room mi102a = Room("MI102a", "");
 	mi102a.Exits = { "F2 Landing" };
 
-	Room mi102b = Room("MI102b", "");
-	mi102b.Exits = { "F2 North Hallway" };
-	mi102b.SetItem(Item("Index"));
+	Room mi102c = Room("MI102c", "");
+	mi102c.Exits = { "F2 North Hallway" };
+	//mi102c.SetItem(&Item("Index"));
 
 	AllRooms = {
-		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102b
+		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
 	};
 }
 
@@ -191,7 +197,7 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_TALK) 
 	{
 		// User talking to an NPC
-		std::string speech = AllRooms[m_roomIndex].RoomNPC.GetSpeech();
+		std::string speech = AllRooms[m_roomIndex].GetNPC()->GetSpeech();
 		DisplayInfo(speech);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_ENTER)
@@ -218,7 +224,7 @@ void UpdateState(Input::Instruction usrInstruction)
 
 		std::string msg = "";
 		for (int i = 0; i < USER_INVENTORY_SIZE; i++) {
-			std::string itemName = (m_userInventory + i)->Name;
+			std::string itemName = (m_userInventory + i)->GetName();
 			if (itemName != "") {
 				msg += itemName;
 				if (i < USER_INVENTORY_SIZE - 2)
@@ -235,18 +241,18 @@ void UpdateState(Input::Instruction usrInstruction)
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
 	{
-		bool result = AllRooms[m_roomIndex].RoomNPC.GiveItem(usrInstruction.Goal);
-		DisplayInfo(AllRooms[m_roomIndex].RoomNPC.GetSpeech());
+		bool result = AllRooms[m_roomIndex].GetNPC()->GiveItem(usrInstruction.Goal);
+		DisplayInfo(AllRooms[m_roomIndex].GetNPC()->GetSpeech());
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
 	{
 		// User picks up an item. 
-		Item itm = AllRooms[m_roomIndex].RoomItem;
-		AllRooms[m_roomIndex].SetItem(Item());
+		Item* itmPtr = AllRooms[m_roomIndex].GetItem();
+		AllRooms[m_roomIndex].SetItem(nullptr);
 
-		m_userInventory[0] = itm;
+		//m_userInventory[0] = itmPtr;
 
-		DisplayInfo("You pick up " + itm.Name);
+		DisplayInfo("You pick up " + itmPtr->GetName());
 	}
 }
 
@@ -270,8 +276,12 @@ void PrintRoomInfo(Room r)
 	out += "> " + r.Name + endl;
 	out += "> - - - - - - " + endl;
 	// Append items if exists
-	if (r.RoomItem.Name != "")
-		out += "> Items: " + r.RoomItem.Name + endl;
+	if (r.GetItem() != nullptr) {
+		Item* itm = r.GetItem();
+		auto a = itm->GetName();
+		out += "> Items: " + a +  endl;
+	}
+		
 	// Append exists if exists
 	if (r.Exits.size() > 0) {
 		out += "> Exits: ";
@@ -282,8 +292,8 @@ void PrintRoomInfo(Room r)
 		}
 		out += endl;
 	}
-	if (r.RoomNPC.GetName() != "")
-		out += "> NPCs: " + r.RoomNPC.GetName() + endl;
+	if (r.GetNPC()->GetName() != "")
+		out += "> NPCs: " + r.GetNPC()->GetName() + endl;
 
 	std::cout << out;
 }

@@ -4,14 +4,14 @@
 class Item
 {
 public:
-	std::string Name;
-
 	Item();
 	Item(std::string name);
 
-	void Use();
-	std::string GetDescription();
+	std::string GetName();
+	void SetName(std::string);
 
 private:
+	std::string m_name;
+
 	int GetRndIndex(int max);
 };
