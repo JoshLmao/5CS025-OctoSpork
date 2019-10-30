@@ -13,19 +13,19 @@ Room::Room()
 
 	m_roomItem = nullptr;
 	m_roomNPC = nullptr;
-	m_exits = nullptr;
-	m_exitsSize = 0;
 }
 
-Room::Room(std::string name, std::string desc)
+Room::Room(std::string name, std::string desc, std::vector<std::string> exits)
 {
 	Name = name;
 	m_description = desc;
 
+	Exits = std::vector<std::string>(exits.size());
+	for (int i = 0; i < exits.size(); i++)
+		Exits[i] = exits[i];
+
 	m_roomItem = nullptr;
 	m_roomNPC = nullptr;
-	m_exits = nullptr;
-	m_exitsSize = 0;
 }
 
 std::string Room::GetDescription()
@@ -55,16 +55,6 @@ void Room::SetNPC(NPC* npc)
 
 std::string Room::GetExit(int index)
 {
-	return m_exits[index];
+	return Exits[index];
 }
 
-int Room::GetExitsSize()
-{
-	return m_exitsSize;
-}
-
-void Room::SetExits(std::string* exitsPtr, int length)
-{
-	m_exits = exitsPtr;
-	m_exitsSize = length;
-}

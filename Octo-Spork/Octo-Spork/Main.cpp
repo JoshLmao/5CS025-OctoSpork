@@ -2,7 +2,7 @@
 #include <string>
 #include <sstream>
 #include <locale>
-#include <array>
+#include <vector>
 #include <thread>
 #include <chrono>
 
@@ -26,7 +26,7 @@ const int ROOM_COUNT = 11;
 const int USER_INVENTORY_SIZE = 4;
 
 /// All rooms containing their items
-static std::array<Room, ROOM_COUNT> AllRooms;
+static std::vector<Room> AllRooms;
 
 /// The user's inventory
 Item* m_userInventory;
@@ -86,25 +86,25 @@ void PlayGame()
 /* Creates the buildings rooms, items, etc */
 void InitBuilding()
 {
-	// Floor 1
-	Room mainHall = Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name");
-	std::string exits[2] = { "North Hallway", "Staircase" };
-	mainHall.SetExits(exits, 2);
-	//mainHall.Exits = { "North Hallway", "Staircase" };
+	std::vector<std::string> exits;
 
+	// Floor 1
+	exits = { "North Hallway", "Staircase" };
+	Room mainHall = Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name", exits);
+	
 	Item example = Item("Example Item");
 	mainHall.SetItem(&example);
 
-	Room nHallway = Room("North Hallway", "Long hallway");
-	nHallway.Exits = { "Main Hall", "East Hallway", "MI034" };
-
-	Room eHallway = Room("East Hallway", "Hidden in the back of the complex");
-	eHallway.Exits = { "North Hallway", "MI035" };
+	exits = { "Main Hall", "East Hallway", "MI034" };
+	Room nHallway = Room("North Hallway", "Long hallway", exits);
+	
+	exits = { "North Hallway", "MI035" };
+	Room eHallway = Room("East Hallway", "Hidden in the back of the complex", exits);
 
 	// Floor 1 - Rooms
 	// MI034
-	Room mi034 = Room("MI034", "A quiet little room tucked away");
-	mi034.Exits = { "North Hallway", "MI035" };
+	exits = { "North Hallway", "MI035" };
+	Room mi034 = Room("MI034", "A quiet little room tucked away", exits);
 	Item mouse = Item();
 	mi034.SetItem(&mouse);
 	
@@ -123,35 +123,36 @@ void InitBuilding()
 	mi034.SetNPC(&ghostVR);
 
 	// MI035
-	Room mi035 = Room("MI035", "Description");
-	mi035.Exits = { "East Hallway" };
-	//Item candle = Item("Candle");
-	//mi035.SetItem(&candle);
+	exits = { "East Hallway" };
+	Room mi035 = Room("MI035", "Description", exits);
+	Item candleItm = Item("Candle");
+	mi035.SetItem(&candleItm);
 
 	// Floor 1 to 2 Staircase 
-	Room staircase = Room("Staircase", "");
-	staircase.Exits = { "Main Hall", "F2 Landing" };
+	exits = { "Main Hall", "F2 Landing" };
+	Room staircase = Room("Staircase", "", exits);
 
 	// Floor 2
-	Room f2Landing = Room("F2 Landing", "");
-	f2Landing.Exits = { "Staircase", "F2 North Hallway", "F2 West Hallway" };
+	exits = { "Staircase", "F2 North Hallway", "F2 West Hallway" };
+	Room f2Landing = Room("F2 Landing", "", exits);
 
-	Room f2nHallway = Room("F2 North Hallway", "");
-	f2nHallway.Exits = { "F2 East Hallway", "F2 Landing", "MI102c" };/*"F2 West Hallway"*/
+	exits = { "F2 East Hallway", "F2 Landing", "MI102c", "F2 West Hallway" };
+	Room f2nHallway = Room("F2 North Hallway", "", exits);
 
-	Room f2eHallway = Room("F2 East Hallway", "");
-	f2eHallway.Exits = { "F2 North Hallway", "F2 East Hallway" };
+	exits = { "F2 North Hallway", "F2 East Hallway" };
+	Room f2eHallway = Room("F2 East Hallway", "", exits);
 
-	Room f2wHallway = Room("F2 West Hallway", "");
-	/*f2wHallway.Exits{ "F2" };*/
+	exits = { "F2 Landing", "F2 North Hallway", "F2 Easy Hallway", "Staircase" };
+	Room f2wHallway = Room("F2 West Hallway", "", exits);
 
 	// Floor 2 - Rooms
-	Room mi102a = Room("MI102a", "");
-	mi102a.Exits = { "F2 Landing" };
+	exits = { "F2 Landing" };
+	Room mi102a = Room("MI102a", "", exits);
 
-	Room mi102c = Room("MI102c", "");
-	mi102c.Exits = { "F2 North Hallway" };
-	//mi102c.SetItem(&Item("Index"));
+	exits = { "F2 North Hallway" };
+	Room mi102c = Room("MI102c", "", exits);
+	Item indexItm = Item("Index");
+	mi102c.SetItem(&indexItm);
 
 	AllRooms = {
 		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
@@ -276,11 +277,11 @@ void PrintRoomInfo(Room r)
 	out += "> " + r.Name + endl;
 	out += "> - - - - - - " + endl;
 	// Append items if exists
-	if (r.GetItem() != nullptr) {
+	/*if (r.GetItem() != nullptr) {
 		Item* itm = r.GetItem();
 		auto a = itm->GetName();
 		out += "> Items: " + a +  endl;
-	}
+	}*/
 		
 	// Append exists if exists
 	if (r.Exits.size() > 0) {
@@ -292,7 +293,7 @@ void PrintRoomInfo(Room r)
 		}
 		out += endl;
 	}
-	if (r.GetNPC()->GetName() != "")
+	if (r.GetNPC() != nullptr)
 		out += "> NPCs: " + r.GetNPC()->GetName() + endl;
 
 	std::cout << out;
