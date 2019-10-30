@@ -51,6 +51,9 @@ Function Input::DetermineFunction(std::string input)
 	else if (lower.find("view room") != std::string::npos) {
 		return FUNCTION_VIEW_ROOM;
 	}
+	else if (lower.find("exit") != std::string::npos) {
+		return FUNCTION_EXIT;
+	}
 	else {
 		return FUNCTION_NONE;
 	}

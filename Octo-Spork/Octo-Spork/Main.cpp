@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <sstream>
 #include <locale>
@@ -21,17 +21,20 @@ void UpdateState(Input::Instruction usrInstruction);
 int FindRoomIndex(std::string roomName);
 void PrintRoomInfo(Room r);
 void Sleep(int ms);
+void DisposeGame();
 
 const int ROOM_COUNT = 11;
 const int USER_INVENTORY_SIZE = 4;
 
 /// All rooms containing their items
-static std::vector<Room> AllRooms;
+static std::vector<Room*> AllRooms;
 
 /// The user's inventory
 Item* m_userInventory;
 /// Current index of the room the user is in
 int m_roomIndex = 0;
+/// Is the user currently playing the game
+bool m_playingGame = false;
 
 int main(int arc, char* argv[])
 {
@@ -48,6 +51,7 @@ int main(int arc, char* argv[])
 /* Begin playing Octo-Spork, main entry */
 void PlayGame()
 {
+	m_playingGame = true;
 	DisplayInfo("Welcome to Octo-Spork!");
 	DisplayInfo("Created by Josh Shepherd (1700471)");
 	InfoBuffer(2);
@@ -64,9 +68,9 @@ void PlayGame()
 
 	InfoBuffer();
 	
-	PrintRoomInfo(AllRooms[m_roomIndex]);
+	PrintRoomInfo(*AllRooms[m_roomIndex]);
 	InfoBuffer();
-	while (true)
+	while (m_playingGame)
 	{
 		DisplayInfo("What will you do?");
 		Input::Instruction inst = Input::ReadUser();
@@ -81,6 +85,8 @@ void PlayGame()
 		
 		InfoBuffer();
 	}
+
+	DisplayInfo("Thanks for playing! Hope you enjoyed the journey");
 }
 
 /* Creates the buildings rooms, items, etc */
@@ -90,23 +96,21 @@ void InitBuilding()
 
 	// Floor 1
 	exits = { "North Hallway", "Staircase" };
-	Room mainHall = Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name", exits);
-	
-	Item example = Item("Example Item");
-	mainHall.SetItem(&example);
+	Room* mainHall = new Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name", exits);
+	mainHall->SetItem(new Item("Example Item"));
 
 	exits = { "Main Hall", "East Hallway", "MI034" };
-	Room nHallway = Room("North Hallway", "Long hallway", exits);
+	Room* nHallway = new Room("North Hallway", "Long hallway", exits);
 	
 	exits = { "North Hallway", "MI035" };
-	Room eHallway = Room("East Hallway", "Hidden in the back of the complex", exits);
+	Room* eHallway = new Room("East Hallway", "Hidden in the back of the complex", exits);
 
 	// Floor 1 - Rooms
 	// MI034
 	exits = { "North Hallway", "MI035" };
-	Room mi034 = Room("MI034", "A quiet little room tucked away", exits);
-	Item mouse = Item();
-	mi034.SetItem(&mouse);
+	Room* mi034 = new Room("MI034", "A quiet little room tucked away", exits);
+	/*Item mouse = Item();
+	mi034.SetItem(&mouse);*/
 	
 	NPCConfig govrConfig = NPCConfig();
 	govrConfig.Name = "Ghost of VR";
@@ -120,39 +124,39 @@ void InitBuilding()
 	govrConfig.ExcessiveLimitCount = 15;
 
 	NPC ghostVR = NPC(govrConfig);
-	mi034.SetNPC(&ghostVR);
+	mi034->SetNPC(&ghostVR);
 
 	// MI035
 	exits = { "East Hallway" };
-	Room mi035 = Room("MI035", "Description", exits);
+	Room* mi035 = new Room("MI035", "Description", exits);
 	Item candleItm = Item("Candle");
-	mi035.SetItem(&candleItm);
+	mi035->SetItem(&candleItm);
 
 	// Floor 1 to 2 Staircase 
 	exits = { "Main Hall", "F2 Landing" };
-	Room staircase = Room("Staircase", "", exits);
+	Room* staircase = new Room("Staircase", "", exits);
 
 	// Floor 2
 	exits = { "Staircase", "F2 North Hallway", "F2 West Hallway" };
-	Room f2Landing = Room("F2 Landing", "", exits);
+	Room* f2Landing = new Room("F2 Landing", "", exits);
 
 	exits = { "F2 East Hallway", "F2 Landing", "MI102c", "F2 West Hallway" };
-	Room f2nHallway = Room("F2 North Hallway", "", exits);
+	Room* f2nHallway = new Room("F2 North Hallway", "", exits);
 
 	exits = { "F2 North Hallway", "F2 East Hallway" };
-	Room f2eHallway = Room("F2 East Hallway", "", exits);
+	Room* f2eHallway = new Room("F2 East Hallway", "", exits);
 
 	exits = { "F2 Landing", "F2 North Hallway", "F2 Easy Hallway", "Staircase" };
-	Room f2wHallway = Room("F2 West Hallway", "", exits);
+	Room* f2wHallway = new Room("F2 West Hallway", "", exits);
 
 	// Floor 2 - Rooms
 	exits = { "F2 Landing" };
-	Room mi102a = Room("MI102a", "", exits);
+	Room* mi102a = new Room("MI102a", "", exits);
 
 	exits = { "F2 North Hallway" };
-	Room mi102c = Room("MI102c", "", exits);
+	Room* mi102c = new Room("MI102c", "", exits);
 	Item indexItm = Item("Index");
-	mi102c.SetItem(&indexItm);
+	mi102c->SetItem(&indexItm);
 
 	AllRooms = {
 		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
@@ -191,6 +195,7 @@ void UpdateState(Input::Instruction usrInstruction)
 		DisplayInfo("take 'ITEM' - Takes an item that is inside the current room");
 		DisplayInfo("view inventory - Lists your current items you're holding");
 		DisplayInfo("view room - Lists the current room's information");
+		DisplayInfo("exit - Quit the game");
 
 		InfoBuffer();
 		DisplayInfo("Tip: Remember you can talk to NPCs multiple times for more information");
@@ -198,15 +203,15 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_TALK) 
 	{
 		// User talking to an NPC
-		std::string speech = AllRooms[m_roomIndex].GetNPC()->GetSpeech();
+		std::string speech = AllRooms[m_roomIndex]->GetNPC()->GetSpeech();
 		DisplayInfo(speech);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_ENTER)
 	{
 		// User enters new room
-		for (int i = 0; i < AllRooms[m_roomIndex].Exits.size(); i++)
+		for (int i = 0; i < AllRooms[m_roomIndex]->GetExitsSize(); i++)
 		{
-			std::string exitLower = Utils::ToLower(AllRooms[m_roomIndex].Exits[i]);
+			std::string exitLower = Utils::ToLower(AllRooms[m_roomIndex]->GetExit(i));
 			std::string goalLower = Utils::ToLower(usrInstruction.Goal);
 			if (exitLower == goalLower)
 			{
@@ -216,7 +221,7 @@ void UpdateState(Input::Instruction usrInstruction)
 		}
 
 		// Print information of new room
-		PrintRoomInfo(AllRooms[m_roomIndex]);
+		PrintRoomInfo(*AllRooms[m_roomIndex]);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY) 
 	{
@@ -238,22 +243,26 @@ void UpdateState(Input::Instruction usrInstruction)
 		DisplayInfo(msg);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_VIEW_ROOM) {
-		PrintRoomInfo(AllRooms[m_roomIndex]);
+		PrintRoomInfo(*AllRooms[m_roomIndex]);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
 	{
-		bool result = AllRooms[m_roomIndex].GetNPC()->GiveItem(usrInstruction.Goal);
-		DisplayInfo(AllRooms[m_roomIndex].GetNPC()->GetSpeech());
+		bool result = AllRooms[m_roomIndex]->GetNPC()->GiveItem(usrInstruction.Goal);
+		DisplayInfo(AllRooms[m_roomIndex]->GetNPC()->GetSpeech());
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
 	{
 		// User picks up an item. 
-		Item* itmPtr = AllRooms[m_roomIndex].GetItem();
-		AllRooms[m_roomIndex].SetItem(nullptr);
+		Item* itmPtr = AllRooms[m_roomIndex]->GetItem();
+		AllRooms[m_roomIndex]->SetItem(nullptr);
 
 		//m_userInventory[0] = itmPtr;
 
 		DisplayInfo("You pick up " + itmPtr->GetName());
+	}
+	else if (usrInstruction.Function == Function::FUNCTION_EXIT) 
+	{
+		m_playingGame = false;
 	}
 }
 
@@ -261,7 +270,7 @@ int FindRoomIndex(std::string roomName)
 {
 	for (int i = 0; i < AllRooms.size(); i++)
 	{
-		std::string roomLower = Utils::ToLower(AllRooms[i].Name);
+		std::string roomLower = Utils::ToLower(AllRooms[i]->Name);
 		if (roomLower == roomName)
 		{
 			return i;
@@ -277,18 +286,19 @@ void PrintRoomInfo(Room r)
 	out += "> " + r.Name + endl;
 	out += "> - - - - - - " + endl;
 	// Append items if exists
-	/*if (r.GetItem() != nullptr) {
+	if (r.GetItem() != nullptr) {
 		Item* itm = r.GetItem();
 		auto a = itm->GetName();
 		out += "> Items: " + a +  endl;
-	}*/
+	}
 		
 	// Append exists if exists
-	if (r.Exits.size() > 0) {
+	int exitsSize = r.GetExitsSize();
+	if (exitsSize > 0) {
 		out += "> Exits: ";
-		for (int i = 0; i < r.Exits.size(); i++) {
-			out += r.Exits[i];
-			if (i < r.Exits.size() - 1)
+		for (int i = 0; i < exitsSize; i++) {
+			out += r.GetExit(i);
+			if (i < exitsSize - 1)
 				out += ", ";
 		}
 		out += endl;
@@ -297,4 +307,12 @@ void PrintRoomInfo(Room r)
 		out += "> NPCs: " + r.GetNPC()->GetName() + endl;
 
 	std::cout << out;
+}
+
+void DisposeGame()
+{
+	for (int i = 0; i < AllRooms.size(); i++)
+	{
+		delete AllRooms[i];
+	}
 }
