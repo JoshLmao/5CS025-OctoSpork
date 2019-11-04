@@ -4,6 +4,7 @@
 
 Item::Item() 
 {
+	m_name = "";
 }
 
 Item::Item(std::string name)

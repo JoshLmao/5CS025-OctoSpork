@@ -19,7 +19,7 @@ void InfoBuffer(int count = 1);
 void PlayGame();
 void UpdateState(Input::Instruction usrInstruction);
 int FindRoomIndex(std::string roomName);
-void PrintRoomInfo(Room r);
+void PrintRoomInfo(Room & r);
 void Sleep(int ms);
 void DisposeGame();
 
@@ -158,9 +158,11 @@ void InitBuilding()
 	Item indexItm = Item("Index");
 	mi102c->SetItem(&indexItm);
 
-	AllRooms = {
-		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
-	};
+	AllRooms.push_back(mainHall);
+
+	//AllRooms = {
+	//	mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
+	//};
 }
 
 void InfoBuffer(int count)
@@ -278,7 +280,7 @@ int FindRoomIndex(std::string roomName)
 	}
 }
 
-void PrintRoomInfo(Room r)
+void PrintRoomInfo(Room & r)
 {
 	std::string out = "";
 
@@ -288,8 +290,8 @@ void PrintRoomInfo(Room r)
 	// Append items if exists
 	if (r.GetItem() != nullptr) {
 		Item* itm = r.GetItem();
-		auto a = itm->GetName();
-		out += "> Items: " + a +  endl;
+		std::string a = itm->GetName();
+		out += "> Items: " + a + endl;
 	}
 		
 	// Append exists if exists
