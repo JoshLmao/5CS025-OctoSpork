@@ -9,7 +9,6 @@ struct Room
 {
 public:
 	std::string Name;
-	
 
 	Room();
 	Room(std::string name, std::string desc, std::vector<std::string> exits);
