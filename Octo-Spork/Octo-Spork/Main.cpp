@@ -12,6 +12,7 @@
 #include "Room.h"
 #include "Input.h"
 #include "Utils.h"
+#include "Inventory.h"
 
 void DisplayInfo(std::string message);
 void InitBuilding();
@@ -24,13 +25,12 @@ void Sleep(int ms);
 void DisposeGame();
 
 const int ROOM_COUNT = 11;
-const int USER_INVENTORY_SIZE = 4;
 
 /// All rooms containing their items
 static std::vector<Room*> AllRooms;
 
 /// The user's inventory
-Item* m_userInventory;
+Inventory m_userInventory;
 /// Current index of the room the user is in
 int m_roomIndex = 0;
 /// Is the user currently playing the game
@@ -40,9 +40,6 @@ int main(int arc, char* argv[])
 {
 	// Initialize all rooms, items before starting any gameplay
 	InitBuilding();
-	// Init user's inventory
-	Item inventory[USER_INVENTORY_SIZE];
-	m_userInventory = inventory;
 	
 	PlayGame();
 	return 0;
@@ -158,11 +155,9 @@ void InitBuilding()
 	Item indexItm = Item("Index");
 	mi102c->SetItem(&indexItm);
 
-	AllRooms.push_back(mainHall);
-
-	//AllRooms = {
-	//	mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
-	//};
+	AllRooms = {
+		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
+	};
 }
 
 void InfoBuffer(int count)
@@ -231,11 +226,11 @@ void UpdateState(Input::Instruction usrInstruction)
 		DisplayInfo("You look through your belongings...");
 
 		std::string msg = "";
-		for (int i = 0; i < USER_INVENTORY_SIZE; i++) {
-			std::string itemName = (m_userInventory + i)->GetName();
+		for (unsigned int i = 0; i < m_userInventory.GetSize(); i++) {
+			std::string itemName = m_userInventory.GetItem(i)->GetName();
 			if (itemName != "") {
 				msg += itemName;
-				if (i < USER_INVENTORY_SIZE - 2)
+				if (i < m_userInventory.GetMaxSize() - 2)
 					msg += ",";
 			}
 		}
@@ -258,7 +253,7 @@ void UpdateState(Input::Instruction usrInstruction)
 		Item* itmPtr = AllRooms[m_roomIndex]->GetItem();
 		AllRooms[m_roomIndex]->SetItem(nullptr);
 
-		//m_userInventory[0] = itmPtr;
+		m_userInventory.AddItem(itmPtr);
 
 		DisplayInfo("You pick up " + itmPtr->GetName());
 	}
