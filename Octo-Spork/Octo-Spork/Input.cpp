@@ -45,6 +45,9 @@ Function Input::DetermineFunction(std::string input)
 	else if (lower.find("take") != std::string::npos) {
 		return FUNCTION_TAKE;
 	}
+	else if (lower.find("drop") != std::string::npos) {
+		return FUNCTION_DROP;
+	}
 	else if (lower.find("help") != std::string::npos || lower.find("?") != std::string::npos) {
 		return FUNCTION_HELP;
 	}

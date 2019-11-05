@@ -223,6 +223,7 @@ void UpdateState(Input::Instruction usrInstruction)
 		DisplayInfo("enter 'ROOM' - Used to move from one room to another");
 		DisplayInfo("talk 'NPC' - Talks to an NPC");
 		DisplayInfo("give 'ITEM' - Attempts to give an item to the current NPC in the room");
+		DisplayInfo("drop 'ITEM' - Drops the item in the current room");
 		DisplayInfo("take 'ITEM' - Takes an item that is inside the current room");
 		DisplayInfo("view inventory - Lists your current items you're holding");
 		DisplayInfo("view room - Lists the current room's information");
@@ -303,6 +304,18 @@ void UpdateState(Input::Instruction usrInstruction)
 			DisplayInfo("You pick up " + itmPtr->GetName());
 		} else {
 			DisplayInfo("You tried to pick up '" + usrInstruction.Goal + "' but couldn\'t find it");
+		}
+	}
+	else if(usrInstruction.Function == Function::FUNCTION_DROP)
+	{
+		// User wants to drop an item
+		bool contains = m_userInventory.Contains(usrInstruction.Goal);
+		if (contains) {
+			Item* itmPtr = m_userInventory.RemoveItem(usrInstruction.Goal);
+			AllRooms[m_roomIndex]->AddItem(itmPtr);
+			DisplayInfo("You dropped '" + itmPtr->GetName() + "'.");
+		} else {
+			DisplayInfo("Can't find the item '" + usrInstruction.Goal + "' inside your inventory.");
 		}
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_EXIT) 
