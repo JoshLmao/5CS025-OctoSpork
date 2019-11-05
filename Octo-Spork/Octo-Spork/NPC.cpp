@@ -71,7 +71,7 @@ bool NPC::GiveItem(std::string itemName)
 		return true;
 
 	m_attemptedItem = itemName;
-	if (Utils::ToLower(m_attemptedItem) == Utils::ToLower(m_config.RequiredItemName)) {
+	if (Utils::ToLowerCompare(m_attemptedItem, m_config.RequiredItemName)) {
 		m_hasRequiredItem = true;
 		return true;
 	}
@@ -86,4 +86,9 @@ bool NPC::IsAnnoyed()
 std::string NPC::GetName()
 {
 	return m_config.Name;
+}
+
+bool NPC::HasRequiredItem()
+{
+	return m_hasRequiredItem;
 }

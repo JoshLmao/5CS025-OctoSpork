@@ -23,6 +23,9 @@ public:
 	/* Gets the max size of the player's inventory, maximum amount of items the player can hold*/
 	int GetMaxSize();
 
+	/* Disposes of all Items inside the inventory */
+	void Dispose();
+
 private:
 	const int USER_INVENTORY_SIZE = 2;
 	/* The user's inventory */

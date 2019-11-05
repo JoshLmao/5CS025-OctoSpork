@@ -65,3 +65,12 @@ int Inventory::GetMaxSize()
 {
 	return USER_INVENTORY_SIZE;
 }
+
+void Inventory::Dispose()
+{
+	for (int i = 0; i < GetSize(); i++)
+	{
+		if (m_inventory[i] != nullptr)
+			delete m_inventory[i];
+	}
+}

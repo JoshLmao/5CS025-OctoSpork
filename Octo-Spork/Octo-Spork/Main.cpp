@@ -24,6 +24,7 @@ void PrintRoomInfo(Room & r);
 void PrintInventory();
 void Sleep(int ms);
 void DisposeGame();
+bool SpiritsHaveItems();
 
 const int ROOM_COUNT = 11;
 
@@ -63,7 +64,7 @@ void PlayGame()
 	Sleep(4000);
 	DisplayInfo("As you stand up, you notice you're stood inside a massive, abandoned facility. Scanning the room, you see a sign that says 'Main Hall'");
 	Sleep(4000);
-	DisplayInfo("You also notice there are three ghostly figures floating up and down behind you at the entrance. Maybe they can shed some light on how I got here and why?");
+	DisplayInfo("You also notice there are three ghostly figures floating up and down behind you at the entrance. Maybe they can shed some light on how you got here and why?");
 
 	InfoBuffer(2);
 	
@@ -101,18 +102,39 @@ void InitBuilding()
 	NPCConfig zeusConfig = NPCConfig();
 	zeusConfig.Name = "Spirit of Zeus";
 	zeusConfig.RequiredItemName = "Lightning Stone";
+	zeusConfig.Greeting = "Hello there, wanderer. I see you finally awaken from your slumber. Ready yourself, soon Odin will return to serve his punishment";
+	zeusConfig.StandardResponse = "Odin creeps ever closer. Your time here is limited. I hope this doesn't come as a 'shock' to you. Mwuahahah";
+	zeusConfig.ExcessiveLimitCount = 6;
+	zeusConfig.ExcessiveResponse = "STOP annoying me with your small talk! Do you require anything from me?";
+	zeusConfig.HasItemResponse = "Wait. No. Could it be? How did you find this? Give it here, quickly.";
+	zeusConfig.CompleteResponse = "If you find any other stones... maybe we will be lenient when Odin arrives";
+	zeusConfig.IncorrectItemResponse = "Why are you giving me this? Ugh, stop wasting my time. Odin will strike swiftly, once he arrives";
 	NPC* zeusNPC = new NPC(zeusConfig);
 	mainHall->AddNPC(zeusNPC);
 
 	NPCConfig freyaConfig = NPCConfig();
 	freyaConfig.Name = "Sprit of Freya";
 	freyaConfig.RequiredItemName = "Earth Stone";
+	freyaConfig.Greeting = "Greetings, my child. My deepest sympothies about your situation. I wish I could do something to help, but Odin arrives soon";
+	freyaConfig.StandardResponse = "I hope that you can find peace with yourself in your final hours. Your situation is a complicated one";
+	freyaConfig.ExcessiveLimitCount = 15;
+	freyaConfig.ExcessiveResponse = "Please stop begging me. There is nothing more I can do for you.";
+	freyaConfig.HasItemResponse = "Oh my... How did you get this?! Please hand it over. I hope for your sake that there are more for you to find";
+	freyaConfig.CompleteResponse = "Have a look around. Zeus & Balder could be persuaded if you could do the same for them";
+	freyaConfig.IncorrectItemResponse = "No, I don't need this.";
 	NPC* freyaNPC = new NPC(freyaConfig);
 	mainHall->AddNPC(freyaNPC);
 
 	NPCConfig balderConfig = NPCConfig();
 	balderConfig.Name = "Spirit of Balder";
 	balderConfig.RequiredItemName = "Light Stone";
+	balderConfig.Greeting = "Well, well, well. The little brat is finally awake. What's the matter? Scared of Odin's punishment? Hah, you should be.";
+	balderConfig.StandardResponse = "Whatd'ya want? Come to grovel to me? It 'aint gonna work.";
+	balderConfig.ExcessiveLimitCount = 8;
+	balderConfig.ExcessiveResponse = "Look, you 'aint getting any help from me. Go be annoying somewhere else.";
+	balderConfig.HasItemResponse = "Oh, how shiny! Pass it 'ere.";
+	balderConfig.CompleteResponse = "Yeah? What is it?";
+	balderConfig.IncorrectItemResponse = "Is this meant to impress me? Well congratulations... *clap* *clap* *clap* - it didn't.";
 	NPC* balderNPC = new NPC(balderConfig);
 	mainHall->AddNPC(balderNPC);
 
@@ -279,14 +301,24 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
 	{
 		// User wants to give an item to the current NPC
-		if (m_currentNPCPtr == nullptr) {
-			DisplayInfo("You try to give '" + usrInstruction.Goal + "'. However, you only hear a loud clunk as the item fall to the floor.");
-			DisplayInfo("Maybe you should make sure someone is there to give the item to first?");
-			return;
+		if (m_userInventory.Contains(usrInstruction.Goal)) {
+			// Check if an NPC currently being spoken to
+			if (m_currentNPCPtr == nullptr) {
+				DisplayInfo("You try to give '" + usrInstruction.Goal + "'. However, you only hear a loud clunk as the item fall to the floor.");
+				DisplayInfo("Maybe you should make sure someone is there to give the item to first?");
+				return;
+			}
+
+			bool result = m_currentNPCPtr->GiveItem(usrInstruction.Goal);
+			DisplayInfo(m_currentNPCPtr->GetSpeech());
+		} else {
+			DisplayInfo("You don't have '" + usrInstruction.Goal + "' in your inventory");
 		}
 
-		bool result = m_currentNPCPtr->GiveItem(usrInstruction.Goal);
-		DisplayInfo(m_currentNPCPtr->GetSpeech());
+		if (SpiritsHaveItems()) 
+		{
+			// ToDo: Implement Ending
+		}
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
 	{
@@ -389,6 +421,7 @@ void PrintRoomInfo(Room & r)
 			if (i < npcsSize - 1)
 				out += ", ";
 		}
+		out += endl;
 	}
 
 	std::cout << out;
@@ -412,10 +445,29 @@ void PrintInventory()
 	DisplayInfo(msg);
 }
 
+/* Disposes of all created objects ready for shutdown */
 void DisposeGame()
 {
-	for (int i = 0; i < AllRooms.size(); i++)
-	{
-		delete AllRooms[i];
+	for (int i = 0; i < AllRooms.size(); i++) {
+		if (AllRooms[i] != nullptr)
+			delete AllRooms[i];
 	}
+
+	m_userInventory.Dispose();
+}
+
+/* Checks if all Spirits have their required item to proceed to ending */
+bool SpiritsHaveItems()
+{
+	int hasItemCount = 0;
+	Room* mainHall = AllRooms[0];
+	int npcSize = mainHall->GetNPCSize();
+	for (int i = 0; i < npcSize; i++) {
+		NPC* npc = mainHall->GetNPC(i);
+		if (npc->HasRequiredItem()) {
+			hasItemCount++;
+		}
+	}
+
+	return hasItemCount == npcSize;
 }

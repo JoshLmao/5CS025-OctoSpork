@@ -36,7 +36,10 @@ public:
 
 	/* Is the NPC annoyed with the player */
 	bool IsAnnoyed();
+	/* Get the name of the NPC */
 	std::string GetName();
+	/* Does the NPC have the item they require? */
+	bool HasRequiredItem();
 
 private:
 	NPCConfig m_config;
