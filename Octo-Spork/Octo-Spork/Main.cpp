@@ -41,7 +41,7 @@ int main(int arc, char* argv[])
 {
 	// Initialize all rooms, items before starting any gameplay
 	InitBuilding();
-	
+
 	PlayGame();
 	return 0;
 }
@@ -63,8 +63,9 @@ void PlayGame()
 	//Sleep(4000);
 	DisplayInfo("As you stand up, you notice you're stood inside a massive, abandoned facility. Scanning the room, you see a sign that says 'Main Hall'");
 	//Sleep(4000);
+	DisplayInfo("You also notice there are three ghostly figures floating up and down behind you at the entrance. Maybe they can shed some light on how I got here and why?");
 
-	InfoBuffer();
+	InfoBuffer(2);
 	
 	PrintRoomInfo(*AllRooms[m_roomIndex]);
 	InfoBuffer();
@@ -106,29 +107,29 @@ void InitBuilding()
 	// Floor 1 - Rooms
 	// MI034
 	exits = { "North Hallway", "MI035" };
-	Room* mi034 = new Room("MI034", "A quiet little room tucked away", exits);
-	Item* mouse = new Item("Computer Mouse");
-	mi034->AddItem(mouse);
+	Room* mi034 = new Room("MI034", "A quiet little room tucked away at the back of the facility", exits);
+	mi034->AddItem(new Item("Computer Mouse"));
+	mi034->AddItem(new Item("Broken Headset"));
 	
 	NPCConfig govrConfig = NPCConfig();
 	govrConfig.Name = "Ghost of VR";
 	govrConfig.RequiredItemName = "Example Item";
 	govrConfig.Greeting = "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?";
-	govrConfig.StandardResponse = "Please, wanderer. Can you free me from this room? I have been here for 500 years now.";
-	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often?";
-	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace";
+	govrConfig.StandardResponse = "Please, wanderer. I have been here for 500 years now. My death is the only thing that bounds me to the realm. Can you help free me?";
+	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often? Help me or leave me be.";
+	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace. I am eternally greateful. Thank you";
 	govrConfig.CompleteResponse = "You have served me well. Now go, let me play VR";
 	govrConfig.IncorrectItemResponse = "What is this? Don't waste my time with irrelevent things.";
 	govrConfig.ExcessiveLimitCount = 15;
 
-	NPC ghostVR = NPC(govrConfig);
-	mi034->SetNPC(&ghostVR);
+	NPC* ghostVR = new NPC(govrConfig);
+	mi034->SetNPC(ghostVR);
 
 	// MI035
 	exits = { "East Hallway" };
 	Room* mi035 = new Room("MI035", "Description", exits);
-	Item* candleItm = new Item("Candle");
-	mi035->AddItem(candleItm);
+	mi035->AddItem(new Item("Ominous Candle"));
+	mi035->AddItem(new Item("VR Controller"));
 
 	// Floor 1 to 2 Staircase 
 	exits = { "Main Hall", "F2 Landing" };
@@ -157,8 +158,6 @@ void InitBuilding()
 
 	exits = { "F2 North Hallway" };
 	Room* mi102c = new Room("MI102c", "", exits);
-	Item* indexItm = new Item("Index");
-	mi102c->AddItem(indexItm);
 
 	// Add all rooms to Vector
 	AllRooms.push_back(mainHall);
@@ -246,7 +245,15 @@ void UpdateState(Input::Instruction usrInstruction)
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
 	{
-		bool result = AllRooms[m_roomIndex]->GetNPC()->GiveItem(usrInstruction.Goal);
+		// User wants to give an item to the current NPC
+		NPC* npc = AllRooms[m_roomIndex]->GetNPC();
+		if (npc == nullptr) {
+			DisplayInfo("You try to give '" + usrInstruction.Goal + "'. However, you only hear a loud clunk as the item fall to the floor.");
+			DisplayInfo("Maybe you should make sure someone is there to give the item to first?");
+			return;
+		}
+
+		bool result = npc->GiveItem(usrInstruction.Goal);
 		DisplayInfo(AllRooms[m_roomIndex]->GetNPC()->GetSpeech());
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
@@ -321,7 +328,8 @@ void PrintRoomInfo(Room & r)
 		}
 		out += endl;
 	}
-	if (r.GetNPC() != nullptr)
+	NPC* npcPtr = r.GetNPC();
+	if (npcPtr != nullptr)
 		out += "> NPCs: " + r.GetNPC()->GetName() + endl;
 
 	std::cout << out;
