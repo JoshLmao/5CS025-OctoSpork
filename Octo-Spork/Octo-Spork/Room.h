@@ -15,7 +15,7 @@ public:
 	Room(std::string name, std::string desc, std::vector<std::string> exits, std::vector<Item*> items);
 	~Room();
 
-	/* Gets an item inside this room, from its index */
+	/* Gets an item inside this room, from its index. Returns a nullptr if out of bounds */
 	Item* GetItem(int index);
 	/* Adds an item for this room*/
 	void AddItem(Item* item);
@@ -26,15 +26,19 @@ public:
 	/* Returns the amount of items inside this room */
 	int GetItemsSize();
 
-	/* Gets an exit from it's index */
+	/* Gets an exit from it's index. Returns empty std::string if index is out of bounds */
 	std::string GetExit(int index);
 	/* Gets the amount of exits set for the room */
 	int GetExitsSize();
 
 	/* Sets the NPC for this room, limited to only one*/
-	void SetNPC(NPC* npc);
-	/* Gets a pointer to the NPC*/
-	NPC* GetNPC();
+	void AddNPC(NPC* npc);
+	/* Gets an NPC by their index. Returns a nullptr if out of bounds */
+	NPC* GetNPC(int index);
+	/* Gets an NPC from it's name. Returns a nullptr if not found */
+	NPC* GetNPC(std::string npcName);
+	/* Gets the amount of NPCs inside this room */
+	int GetNPCSize();
 
 	/*Gets the print out room description for the room*/
 	std::string GetDescription();
@@ -46,6 +50,6 @@ private:
 	std::vector<std::string> m_exits;
 	/* Items inside the room */
 	std::vector<Item*> m_items;
-	/* NPC inside the room */
-	NPC* m_npc;
+	/* All NPCs inside this room */
+	std::vector<NPC*> m_npcs;
 };

@@ -29,13 +29,13 @@ const int ROOM_COUNT = 11;
 
 /// All rooms containing their items
 static std::vector<Room*> AllRooms;
-
 /// The user's inventory
 Inventory m_userInventory;
 /// Current index of the room the user is in
 int m_roomIndex = 0;
 /// Is the user currently playing the game
 bool m_playingGame = false;
+NPC* m_currentNPCPtr = nullptr;
 
 int main(int arc, char* argv[])
 {
@@ -54,15 +54,15 @@ void PlayGame()
 	DisplayInfo("Created by Josh Shepherd (1700471)");
 	InfoBuffer(2);
 
-	//Sleep(1000);
+	Sleep(1000);
 
 	// Introduction
 	DisplayInfo(" - Introduction - ");
-	//Sleep(2000);
+	Sleep(2000);
 	DisplayInfo("You awaken on the floor of a cold, damp and dilapidated structure. You're feeling dazed, a little confused with a slight pain in the back of your head");
-	//Sleep(4000);
+	Sleep(4000);
 	DisplayInfo("As you stand up, you notice you're stood inside a massive, abandoned facility. Scanning the room, you see a sign that says 'Main Hall'");
-	//Sleep(4000);
+	Sleep(4000);
 	DisplayInfo("You also notice there are three ghostly figures floating up and down behind you at the entrance. Maybe they can shed some light on how I got here and why?");
 
 	InfoBuffer(2);
@@ -98,6 +98,24 @@ void InitBuilding()
 	Room* mainHall = new Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name", exits);
 	mainHall->AddItem(new Item("Example Item"));
 
+	NPCConfig zeusConfig = NPCConfig();
+	zeusConfig.Name = "Spirit of Zeus";
+	zeusConfig.RequiredItemName = "Lightning Stone";
+	NPC* zeusNPC = new NPC(zeusConfig);
+	mainHall->AddNPC(zeusNPC);
+
+	NPCConfig freyaConfig = NPCConfig();
+	freyaConfig.Name = "Sprit of Freya";
+	freyaConfig.RequiredItemName = "Earth Stone";
+	NPC* freyaNPC = new NPC(freyaConfig);
+	mainHall->AddNPC(freyaNPC);
+
+	NPCConfig balderConfig = NPCConfig();
+	balderConfig.Name = "Spirit of Balder";
+	balderConfig.RequiredItemName = "Light Stone";
+	NPC* balderNPC = new NPC(balderConfig);
+	mainHall->AddNPC(balderNPC);
+
 	exits = { "Main Hall", "East Hallway", "MI034" };
 	Room* nHallway = new Room("North Hallway", "Long hallway", exits);
 	
@@ -123,7 +141,7 @@ void InitBuilding()
 	govrConfig.ExcessiveLimitCount = 15;
 
 	NPC* ghostVR = new NPC(govrConfig);
-	mi034->SetNPC(ghostVR);
+	mi034->AddNPC(ghostVR);
 
 	// MI035
 	exits = { "East Hallway" };
@@ -173,6 +191,7 @@ void InitBuilding()
 	AllRooms.push_back(mi102c);
 }
 
+/* Adds an amount of new line char's specified in 'count' */
 void InfoBuffer(int count)
 {
 	std::string el;
@@ -182,14 +201,16 @@ void InfoBuffer(int count)
 	std::cout << el;
 }
 
+/* Displays a message to the console with a specific format */
 inline void DisplayInfo(std::string message)
 {
 	std::cout << "> " << message << std::endl;
 }
 
+/* Sleeps the main thread for the specified amount of milliseconds */
 inline void Sleep(int ms)
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 void UpdateState(Input::Instruction usrInstruction)
@@ -213,8 +234,15 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_TALK) 
 	{
 		// User talking to an NPC
-		std::string speech = AllRooms[m_roomIndex]->GetNPC()->GetSpeech();
-		DisplayInfo(speech);
+		m_currentNPCPtr = AllRooms[m_roomIndex]->GetNPC(usrInstruction.Goal);
+		
+		if (m_currentNPCPtr == nullptr) {
+			DisplayInfo("There is no one here named '" + usrInstruction.Goal + "'.");
+		}
+		else {
+			std::string speech = m_currentNPCPtr->GetSpeech();
+			DisplayInfo(speech);
+		}
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_ENTER)
 	{
@@ -229,6 +257,10 @@ void UpdateState(Input::Instruction usrInstruction)
 				break;
 			}
 		}
+
+		// Reset current talking to NPC since user changed room
+		if (m_currentNPCPtr != nullptr)
+			m_currentNPCPtr = nullptr;
 
 		// Print information of new room
 		PrintRoomInfo(*AllRooms[m_roomIndex]);
@@ -246,15 +278,14 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
 	{
 		// User wants to give an item to the current NPC
-		NPC* npc = AllRooms[m_roomIndex]->GetNPC();
-		if (npc == nullptr) {
+		if (m_currentNPCPtr == nullptr) {
 			DisplayInfo("You try to give '" + usrInstruction.Goal + "'. However, you only hear a loud clunk as the item fall to the floor.");
 			DisplayInfo("Maybe you should make sure someone is there to give the item to first?");
 			return;
 		}
 
-		bool result = npc->GiveItem(usrInstruction.Goal);
-		DisplayInfo(AllRooms[m_roomIndex]->GetNPC()->GetSpeech());
+		bool result = m_currentNPCPtr->GiveItem(usrInstruction.Goal);
+		DisplayInfo(m_currentNPCPtr->GetSpeech());
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
 	{
@@ -296,6 +327,13 @@ int FindRoomIndex(std::string roomName)
 	}
 }
 
+/*	Prints out room information in the format:
+	> Room Name
+	> - - - - 
+	> Items: Itm1, Itm2
+	> Exits: Exit1, Exit2
+	> NPCs: NPC1, NPC2
+	*/
 void PrintRoomInfo(Room & r)
 {
 	std::string out = "";
@@ -310,7 +348,7 @@ void PrintRoomInfo(Room & r)
 		out += "> Items: ";
 		for (unsigned int i = 0; i < itmsSize; i++) {
 			out += r.GetItem(i)->GetName();
-			if (i < itmsSize - 2) {
+			if (i < itmsSize - 1) {
 				out += ", ";
 			}
 		}
@@ -328,13 +366,22 @@ void PrintRoomInfo(Room & r)
 		}
 		out += endl;
 	}
-	NPC* npcPtr = r.GetNPC();
-	if (npcPtr != nullptr)
-		out += "> NPCs: " + r.GetNPC()->GetName() + endl;
+
+	// Append NPCs if exists
+	int npcsSize= r.GetNPCSize();
+	if (npcsSize > 0) {
+		out += "> NPCs: ";
+		for (int i = 0; i < npcsSize; i++) {
+			out += r.GetNPC(i)->GetName();
+			if (i < npcsSize - 1)
+				out += ", ";
+		}
+	}
 
 	std::cout << out;
 }
 
+/*	Prints out the inventory of the user */
 void PrintInventory()
 {
 	std::string msg = "";

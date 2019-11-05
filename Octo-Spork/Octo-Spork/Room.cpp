@@ -12,9 +12,9 @@ Room::Room()
 	Name = "Unknown Room";
 	m_description = "Unknown description";
 
+	m_exits = std::vector<std::string>(0);
 	m_items = std::vector<Item*>(0);
-
-	m_npc = nullptr;
+	m_npcs = std::vector<NPC*>(0);
 }
 
 Room::Room(std::string name, std::string desc, std::vector<std::string> exits)
@@ -27,8 +27,7 @@ Room::Room(std::string name, std::string desc, std::vector<std::string> exits)
 		m_exits[i] = exits[i];
 
 	m_items = std::vector<Item*>(0);
-
-	m_npc = nullptr;
+	m_npcs = std::vector<NPC*>(0);
 }
 
 Room::Room(std::string name, std::string desc, std::vector<std::string> exits, std::vector<Item*> items)
@@ -41,7 +40,7 @@ Room::Room(std::string name, std::string desc, std::vector<std::string> exits, s
 		m_exits[i] = exits[i];
 
 	m_items = items;
-	m_npc = nullptr;
+	m_npcs = std::vector<NPC*>(0);
 }
 
 Room::~Room() 
@@ -59,7 +58,10 @@ std::string Room::GetDescription()
 
 Item* Room::GetItem(int index)
 {
-	return m_items[index];
+	if (index > -1 && index < m_items.size())
+		return m_items[index];
+	else
+		return nullptr;
 }
 
 int Room::GetItemsSize()
@@ -102,19 +104,47 @@ bool Room::ItemsContains(std::string name)
 	return false;
 }
 
-NPC* Room::GetNPC() 
+NPC* Room::GetNPC(int index)
 {
-	return m_npc;
+	if (index > -1 && index < m_npcs.size())
+		return m_npcs[index];
+	else
+		return nullptr;
 }
 
-void Room::SetNPC(NPC* npc) 
+NPC* Room::GetNPC(std::string npcName)
 {
-	m_npc = npc;
+	int index = -1;
+	for (unsigned int i = 0; i < GetNPCSize(); i++) {
+		NPC* npc = GetNPC(i);
+		if (Utils::ToLowerCompare(npcName, npc->GetName())) {
+			index = i;
+		}
+	}
+
+	if (index > -1 && index < GetNPCSize())
+		return m_npcs[index];
+	else
+		return nullptr;
+
+}
+
+void Room::AddNPC(NPC* npc) 
+{
+	m_npcs.push_back(npc);
+}
+
+int Room::GetNPCSize()
+{
+	return m_npcs.size();
 }
 
 std::string Room::GetExit(int index)
 {
-	return m_exits[index];
+	if (index > -1 && index < m_exits.size())
+		return m_exits[index];
+	else
+		return "";
 }
 
 int Room::GetExitsSize()
