@@ -12,12 +12,19 @@ public:
 
 	Room();
 	Room(std::string name, std::string desc, std::vector<std::string> exits);
+	Room(std::string name, std::string desc, std::vector<std::string> exits, std::vector<Item*> items);
 	~Room();
 
-	/* Gets a pointer to the item for this room */
-	Item* GetItem();
-	/*Sets the item for this room*/
-	void SetItem(Item* item);
+	/* Gets an item inside this room, from its index */
+	Item* GetItem(int index);
+	/* Adds an item for this room*/
+	void AddItem(Item* item);
+	/* Removes an item from this room */
+	Item* RemoveItem(std::string itmName);
+	/* Does the Items in this room contain this item */
+	bool ItemsContains(std::string name);
+	/* Returns the amount of items inside this room */
+	int GetItemsSize();
 
 	/* Gets an exit from it's index */
 	std::string GetExit(int index);
@@ -31,12 +38,14 @@ public:
 
 	/*Gets the print out room description for the room*/
 	std::string GetDescription();
+
 private:
+	/* Standard description of this room */
 	std::string m_description;
+	/* All exits available in this room */
 	std::vector<std::string> m_exits;
-	
-	/* Item inside the room */
-	Item* m_item;
+	/* Items inside the room */
+	std::vector<Item*> m_items;
 	/* NPC inside the room */
 	NPC* m_npc;
 };

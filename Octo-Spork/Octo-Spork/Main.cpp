@@ -95,7 +95,7 @@ void InitBuilding()
 	// Floor 1
 	exits = { "North Hallway", "Staircase" };
 	Room* mainHall = new Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name", exits);
-	mainHall->SetItem(new Item("Example Item"));
+	mainHall->AddItem(new Item("Example Item"));
 
 	exits = { "Main Hall", "East Hallway", "MI034" };
 	Room* nHallway = new Room("North Hallway", "Long hallway", exits);
@@ -107,8 +107,8 @@ void InitBuilding()
 	// MI034
 	exits = { "North Hallway", "MI035" };
 	Room* mi034 = new Room("MI034", "A quiet little room tucked away", exits);
-	/*Item mouse = Item();
-	mi034.SetItem(&mouse);*/
+	Item* mouse = new Item("Computer Mouse");
+	mi034->AddItem(mouse);
 	
 	NPCConfig govrConfig = NPCConfig();
 	govrConfig.Name = "Ghost of VR";
@@ -128,7 +128,7 @@ void InitBuilding()
 	exits = { "East Hallway" };
 	Room* mi035 = new Room("MI035", "Description", exits);
 	Item* candleItm = new Item("Candle");
-	mi035->SetItem(candleItm);
+	mi035->AddItem(candleItm);
 
 	// Floor 1 to 2 Staircase 
 	exits = { "Main Hall", "F2 Landing" };
@@ -152,12 +152,15 @@ void InitBuilding()
 	Room* mi102a = new Room("MI102a", "", exits);
 
 	Room* mi102b = new Room("MI102b", "", exits);
+	Item* Ostone = new Item("The O stone");
+	mi102b->AddItem(Ostone);
 
 	exits = { "F2 North Hallway" };
 	Room* mi102c = new Room("MI102c", "", exits);
 	Item* indexItm = new Item("Index");
-	mi102c->SetItem(indexItm);
+	mi102c->AddItem(indexItm);
 
+	// Add all rooms to Vector
 	AllRooms.push_back(mainHall);
 	AllRooms.push_back(nHallway);
 	AllRooms.push_back(eHallway);
@@ -169,9 +172,6 @@ void InitBuilding()
 	AllRooms.push_back(mi102a);
 	AllRooms.push_back(mi102b);
 	AllRooms.push_back(mi102c);
-	AllRooms = {
-		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
-	};
 }
 
 void InfoBuffer(int count)
@@ -252,15 +252,15 @@ void UpdateState(Input::Instruction usrInstruction)
 	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
 	{
 		// User picks up an item. 
-		Item* itmPtr = AllRooms[m_roomIndex]->GetItem();
-		if (itmPtr == nullptr) {
+		int size = AllRooms[m_roomIndex]->GetItemsSize();
+		if (size <= 0) {
 			DisplayInfo("There are no items here.");
 			return;
 		}
 
-		bool isSameName = Utils::ToLowerCompare(itmPtr->GetName(), usrInstruction.Goal);
-		if (isSameName) {
-			AllRooms[m_roomIndex]->SetItem(nullptr);
+		bool contains = AllRooms[m_roomIndex]->ItemsContains(usrInstruction.Goal);
+		if (contains) {
+			Item* itmPtr = AllRooms[m_roomIndex]->RemoveItem(usrInstruction.Goal);
 			m_userInventory.AddItem(itmPtr);
 			DisplayInfo("You pick up " + itmPtr->GetName());
 		} else {
@@ -296,11 +296,18 @@ void PrintRoomInfo(Room & r)
 	std::string endl = "\n";
 	out += "> " + r.Name + endl;
 	out += "> - - - - - - " + endl;
-	// Append items if exists
-	if (r.GetItem() != nullptr) {
-		Item* itm = r.GetItem();
-		std::string a = itm->GetName();
-		out += "> Items: " + a + endl;
+	
+	// Append items if there are any
+	int itmsSize = r.GetItemsSize();
+	if (itmsSize > 0) {
+		out += "> Items: ";
+		for (unsigned int i = 0; i < itmsSize; i++) {
+			out += r.GetItem(i)->GetName();
+			if (i < itmsSize - 2) {
+				out += ", ";
+			}
+		}
+		out += endl;
 	}
 		
 	// Append exists if exists
