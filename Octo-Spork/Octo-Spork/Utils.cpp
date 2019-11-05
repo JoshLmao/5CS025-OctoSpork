@@ -11,3 +11,8 @@ std::string Utils::ToLower(std::string s)
 		lower += std::tolower(s[i], loc);
 	return lower;
 }
+
+bool Utils::ToLowerCompare(std::string a, std::string b) 
+{
+	return ToLower(a) == ToLower(b);
+}

@@ -21,6 +21,7 @@ void PlayGame();
 void UpdateState(Input::Instruction usrInstruction);
 int FindRoomIndex(std::string roomName);
 void PrintRoomInfo(Room & r);
+void PrintInventory();
 void Sleep(int ms);
 void DisposeGame();
 
@@ -126,8 +127,8 @@ void InitBuilding()
 	// MI035
 	exits = { "East Hallway" };
 	Room* mi035 = new Room("MI035", "Description", exits);
-	Item candleItm = Item("Candle");
-	mi035->SetItem(&candleItm);
+	Item* candleItm = new Item("Candle");
+	mi035->SetItem(candleItm);
 
 	// Floor 1 to 2 Staircase 
 	exits = { "Main Hall", "F2 Landing" };
@@ -150,11 +151,24 @@ void InitBuilding()
 	exits = { "F2 Landing" };
 	Room* mi102a = new Room("MI102a", "", exits);
 
+	Room* mi102b = new Room("MI102b", "", exits);
+
 	exits = { "F2 North Hallway" };
 	Room* mi102c = new Room("MI102c", "", exits);
-	Item indexItm = Item("Index");
-	mi102c->SetItem(&indexItm);
+	Item* indexItm = new Item("Index");
+	mi102c->SetItem(indexItm);
 
+	AllRooms.push_back(mainHall);
+	AllRooms.push_back(nHallway);
+	AllRooms.push_back(eHallway);
+	AllRooms.push_back(mi034);
+	AllRooms.push_back(mi035);
+	AllRooms.push_back(staircase);
+	AllRooms.push_back(f2Landing);
+	AllRooms.push_back(f2nHallway);
+	AllRooms.push_back(mi102a);
+	AllRooms.push_back(mi102b);
+	AllRooms.push_back(mi102c);
 	AllRooms = {
 		mainHall, nHallway, eHallway, mi034, mi035, staircase, f2Landing, f2nHallway, f2eHallway, mi102a, mi102c
 	};
@@ -224,22 +238,10 @@ void UpdateState(Input::Instruction usrInstruction)
 	{
 		// User viewing their inventory
 		DisplayInfo("You look through your belongings...");
-
-		std::string msg = "";
-		for (unsigned int i = 0; i < m_userInventory.GetSize(); i++) {
-			std::string itemName = m_userInventory.GetItem(i)->GetName();
-			if (itemName != "") {
-				msg += itemName;
-				if (i < m_userInventory.GetMaxSize() - 2)
-					msg += ",";
-			}
-		}
-
-		if (msg == "")
-			msg = "You have no items in your inventory.";
-		DisplayInfo(msg);
+		PrintInventory();
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_VIEW_ROOM) {
+		// Print the room info to the user
 		PrintRoomInfo(*AllRooms[m_roomIndex]);
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_GIVE) 
@@ -251,15 +253,27 @@ void UpdateState(Input::Instruction usrInstruction)
 	{
 		// User picks up an item. 
 		Item* itmPtr = AllRooms[m_roomIndex]->GetItem();
-		AllRooms[m_roomIndex]->SetItem(nullptr);
+		if (itmPtr == nullptr) {
+			DisplayInfo("There are no items here.");
+			return;
+		}
 
-		m_userInventory.AddItem(itmPtr);
-
-		DisplayInfo("You pick up " + itmPtr->GetName());
+		bool isSameName = Utils::ToLowerCompare(itmPtr->GetName(), usrInstruction.Goal);
+		if (isSameName) {
+			AllRooms[m_roomIndex]->SetItem(nullptr);
+			m_userInventory.AddItem(itmPtr);
+			DisplayInfo("You pick up " + itmPtr->GetName());
+		} else {
+			DisplayInfo("You tried to pick up '" + usrInstruction.Goal + "' but couldn\'t find it");
+		}
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_EXIT) 
 	{
-		m_playingGame = false;
+		// User wants to exit game. Confirm and quit if so
+		DisplayInfo("Are you sure you wish to quit? Type 'exit' again to confirm");
+		Input::Instruction inst = Input::ReadUser();
+		if (inst.Function == FUNCTION_EXIT)
+			m_playingGame = false;
 	}
 }
 
@@ -304,6 +318,23 @@ void PrintRoomInfo(Room & r)
 		out += "> NPCs: " + r.GetNPC()->GetName() + endl;
 
 	std::cout << out;
+}
+
+void PrintInventory()
+{
+	std::string msg = "";
+	for (unsigned int i = 0; i < m_userInventory.GetSize(); i++) {
+		std::string itemName = m_userInventory.GetItem(i)->GetName();
+		if (itemName != "") {
+			msg += itemName;
+			if (i < m_userInventory.GetMaxSize() - 2)
+				msg += ",";
+		}
+	}
+
+	if (msg == "")
+		msg = "You have no items in your inventory.";
+	DisplayInfo(msg);
 }
 
 void DisposeGame()
