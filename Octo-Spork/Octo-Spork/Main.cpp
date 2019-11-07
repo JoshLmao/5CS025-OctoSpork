@@ -219,6 +219,18 @@ void InitBuilding()
 	exits = { "F2 North Hallway" };
 	Room* mi102c = new Room("MI102c", "", exits);
 
+	NPCConfig headConfig = NPCConfig();
+	headConfig.Name = "Abandoned Head";
+	headConfig.RequiredItemName = "NO_ITEM";
+	headConfig.Greeting = "Ahh, nice to meet ya, fellow prisoner. NIce to see another prisoner come through. Trut me, I've been stuck here for a while now and seen plenty o' fellows.";
+	headConfig.StandardResponse = "If I were you, I'd see about convincing them spirits to let you out. Have a look around! There might be some bargaining chips you could use";
+	headConfig.ExcessiveLimitCount = 5;
+	headConfig.ExcessiveResponse = "I'm just a head. Stop asking me questions! You might have a body still but are you sure you have a brain?";
+	headConfig.IncorrectItemResponse = "What am I gonna do with this. I'm just a head, ya know.";
+
+	NPC* headNPC = new NPC(headConfig);
+	mi102c->AddNPC(headNPC);
+
 	// Add all rooms to Vector
 	AllRooms.push_back(mainHall);
 	AllRooms.push_back(nHallway);
