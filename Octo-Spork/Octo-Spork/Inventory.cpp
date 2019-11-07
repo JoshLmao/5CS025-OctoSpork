@@ -30,12 +30,23 @@ bool Inventory::Contains(std::string itmName)
 	return false;
 }
 
-void Inventory::AddItem(Item* itmPtr)
+bool Inventory::AddItem(Item* itmPtr)
 {
 	if (m_inventory.size() > USER_INVENTORY_SIZE - 1) {
-		return;
+		return false;
 	}
 	m_inventory.push_back(itmPtr);
+	return true;
+}
+
+void Inventory::AddItem(Item* itmPtr, bool forceAdd)
+{
+	if (forceAdd) {
+		m_inventory.push_back(itmPtr);
+	}
+	else {
+		AddItem(itmPtr);
+	}
 }
 
 Item* Inventory::RemoveItem(std::string itmName) 
@@ -73,4 +84,9 @@ void Inventory::Dispose()
 		if (m_inventory[i] != nullptr)
 			delete m_inventory[i];
 	}
+}
+
+bool Inventory::CanAddItem()
+{
+	return GetSize() < GetMaxSize();
 }

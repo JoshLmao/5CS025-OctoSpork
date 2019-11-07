@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 
+#include "Item.h"
+
 struct NPCConfig {
 	std::string Name;
 	std::string RequiredItemName;
@@ -41,11 +43,20 @@ public:
 	/* Does the NPC have the item they require? */
 	bool HasRequiredItem();
 
+	/* Sets the item reward for this NPC */
+	void SetReward(Item* itm);
+	/*	Get the reward that this NPC gives to the player once the player has given them the right item
+		NPC forgets about the pointer after this is called
+		*/
+	Item* PopReward();
+
 private:
 	NPCConfig m_config;
 
 	/* Name of item attempted to be given to the NPC */
 	std::string m_attemptedItem;
+	/* The item to reward the player with */
+	Item* m_reward;
 
 	/* Has the NPC greeted the player before */
 	bool m_hasGreeted;

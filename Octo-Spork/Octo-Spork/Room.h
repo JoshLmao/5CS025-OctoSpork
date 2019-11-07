@@ -30,6 +30,8 @@ public:
 	std::string GetExit(int index);
 	/* Gets the amount of exits set for the room */
 	int GetExitsSize();
+	/* Adds an exit to the room */
+	void AddExit(std::string exitName);
 
 	/* Sets the NPC for this room, limited to only one*/
 	void AddNPC(NPC* npc);

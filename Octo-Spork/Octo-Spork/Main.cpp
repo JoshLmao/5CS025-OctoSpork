@@ -25,8 +25,13 @@ void PrintInventory();
 void Sleep(int ms);
 void DisposeGame();
 bool SpiritsHaveItems();
+void TryTakeItem(std::string itmName);
 
 const int ROOM_COUNT = 11;
+// Names of items required to finish the game
+const std::string LIGHTNING_STONE = "Lightning Stone";
+const std::string EARTH_STONE = "Earth Stone";
+const std::string LIGHT_STONE = "Light Stone";
 
 /// All rooms containing their items
 static std::vector<Room*> AllRooms;
@@ -64,7 +69,9 @@ void PlayGame()
 	Sleep(4000);
 	DisplayInfo("As you stand up, you notice you're stood inside a massive, abandoned facility. Scanning the room, you see a sign that says 'Main Hall'");
 	Sleep(4000);
-	DisplayInfo("You also notice there are three ghostly figures floating up and down behind you at the entrance. Maybe they can shed some light on how you got here and why?");
+	DisplayInfo("A massive wall of endless running cloud falls down one side of the room. It seems to be blocking a path to somewhere");
+	Sleep(4000);
+	DisplayInfo("You also notice there are three ghostly figures floating up and down in front of the cloud wall. Maybe they can shed some light on how you got here and why?");
 
 	InfoBuffer(2);
 	
@@ -94,14 +101,21 @@ void InitBuilding()
 {
 	std::vector<std::string> exits;
 
-	// Floor 1
+	// Spawn Room, Main Hall
 	exits = { "North Hallway", "Staircase" };
 	Room* mainHall = new Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name", exits);
-	mainHall->AddItem(new Item("Example Item"));
 
+#if _DEBUG
+	// Here's your cheats, ya filthy animal
+	mainHall->AddItem(new Item(LIGHTNING_STONE));
+	mainHall->AddItem(new Item(EARTH_STONE));
+	mainHall->AddItem(new Item(LIGHT_STONE));
+#endif
+
+	// One of Three Spitis, Zeus
 	NPCConfig zeusConfig = NPCConfig();
 	zeusConfig.Name = "Spirit of Zeus";
-	zeusConfig.RequiredItemName = "Lightning Stone";
+	zeusConfig.RequiredItemName = LIGHTNING_STONE;
 	zeusConfig.Greeting = "Hello there, wanderer. I see you finally awaken from your slumber. Ready yourself, soon Odin will return to serve his punishment";
 	zeusConfig.StandardResponse = "Odin creeps ever closer. Your time here is limited. I hope this doesn't come as a 'shock' to you. Mwuahahah";
 	zeusConfig.ExcessiveLimitCount = 6;
@@ -112,39 +126,42 @@ void InitBuilding()
 	NPC* zeusNPC = new NPC(zeusConfig);
 	mainHall->AddNPC(zeusNPC);
 
+	// One of Three Spitis, Freya
 	NPCConfig freyaConfig = NPCConfig();
-	freyaConfig.Name = "Sprit of Freya";
-	freyaConfig.RequiredItemName = "Earth Stone";
-	freyaConfig.Greeting = "Greetings, my child. My deepest sympothies about your situation. I wish I could do something to help, but Odin arrives soon";
+	freyaConfig.Name = "Spirit of Freya";
+	freyaConfig.RequiredItemName = EARTH_STONE;
+	freyaConfig.Greeting = "Greetings, my child. My deepest sympothies about your situation. I wish I could do something to help, but Odin arrives soon.";
 	freyaConfig.StandardResponse = "I hope that you can find peace with yourself in your final hours. Your situation is a complicated one";
 	freyaConfig.ExcessiveLimitCount = 15;
 	freyaConfig.ExcessiveResponse = "Please stop begging me. There is nothing more I can do for you.";
 	freyaConfig.HasItemResponse = "Oh my... How did you get this?! Please hand it over. I hope for your sake that there are more for you to find";
-	freyaConfig.CompleteResponse = "Have a look around. Zeus & Balder could be persuaded if you could do the same for them";
+	freyaConfig.CompleteResponse = "Have a look around. Zeus & Baulder could be persuaded if you could do the same for them";
 	freyaConfig.IncorrectItemResponse = "No, I don't need this.";
 	NPC* freyaNPC = new NPC(freyaConfig);
 	mainHall->AddNPC(freyaNPC);
 
-	NPCConfig balderConfig = NPCConfig();
-	balderConfig.Name = "Spirit of Balder";
-	balderConfig.RequiredItemName = "Light Stone";
-	balderConfig.Greeting = "Well, well, well. The little brat is finally awake. What's the matter? Scared of Odin's punishment? Hah, you should be.";
-	balderConfig.StandardResponse = "Whatd'ya want? Come to grovel to me? It 'aint gonna work.";
-	balderConfig.ExcessiveLimitCount = 8;
-	balderConfig.ExcessiveResponse = "Look, you 'aint getting any help from me. Go be annoying somewhere else.";
-	balderConfig.HasItemResponse = "Oh, how shiny! Pass it 'ere.";
-	balderConfig.CompleteResponse = "Yeah? What is it?";
-	balderConfig.IncorrectItemResponse = "Is this meant to impress me? Well congratulations... *clap* *clap* *clap* - it didn't.";
-	NPC* balderNPC = new NPC(balderConfig);
-	mainHall->AddNPC(balderNPC);
+	// One of Three Spitis, Baulder
+	NPCConfig baulderConfig = NPCConfig();
+	baulderConfig.Name = "Spirit of Baulder";
+	baulderConfig.RequiredItemName = LIGHT_STONE;
+	baulderConfig.Greeting = "Well, well, well. The little brat is finally awake. What's the matter? Scared of Odin's punishment? Hah, you should be. May the guardian light shine through your final hours";
+	baulderConfig.StandardResponse = "Whatd'ya want? Come to grovel to me? It 'aint gonna work.";
+	baulderConfig.ExcessiveLimitCount = 8;
+	baulderConfig.ExcessiveResponse = "Look, you 'aint getting any help from me. Go be annoying somewhere else.";
+	baulderConfig.HasItemResponse = "Oh, how shiny! Pass it 'ere.";
+	baulderConfig.CompleteResponse = "Yeah? What is it?";
+	baulderConfig.IncorrectItemResponse = "Is this meant to impress me? Well congratulations... *clap* *clap* *clap* - it didn't.";
+	NPC* baulderNPC = new NPC(baulderConfig);
+	mainHall->AddNPC(baulderNPC);
 
+	// Ground Floor - Hallways
 	exits = { "Main Hall", "East Hallway", "MI034" };
 	Room* nHallway = new Room("North Hallway", "Long hallway", exits);
 	
 	exits = { "North Hallway", "MI035" };
 	Room* eHallway = new Room("East Hallway", "Hidden in the back of the complex", exits);
 
-	// Floor 1 - Rooms
+	// Ground Floor - Rooms
 	// MI034
 	exits = { "North Hallway", "MI035" };
 	Room* mi034 = new Room("MI034", "A quiet little room tucked away at the back of the facility", exits);
@@ -157,12 +174,15 @@ void InitBuilding()
 	govrConfig.Greeting = "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?";
 	govrConfig.StandardResponse = "Please, wanderer. I have been here for 500 years now. My death is the only thing that bounds me to the realm. Can you help free me?";
 	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often? Help me or leave me be.";
-	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace. I am eternally greateful. Thank you";
-	govrConfig.CompleteResponse = "You have served me well. Now go, let me play VR";
+	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace. I am eternally greateful. Thank you. And here, take this I found lying around";
+	govrConfig.CompleteResponse = "You have served me well. Now go, let me play VR.";
 	govrConfig.IncorrectItemResponse = "What is this? Don't waste my time with irrelevent things.";
 	govrConfig.ExcessiveLimitCount = 15;
 
 	NPC* ghostVR = new NPC(govrConfig);
+	Item* stone = new Item(LIGHT_STONE);
+	ghostVR->SetReward(stone);
+
 	mi034->AddNPC(ghostVR);
 
 	// MI035
@@ -177,24 +197,24 @@ void InitBuilding()
 
 	// Floor 2
 	exits = { "Staircase", "F2 North Hallway", "F2 West Hallway" };
-	Room* f2Landing = new Room("F2 Landing", "", exits);
+	Room* f2Landing = new Room("F2 Landing", "A massive open space, full of old and rusted parts. From here I can see three room, all look abandoned and filled with broken glass", exits);
 
 	exits = { "F2 East Hallway", "F2 Landing", "MI102c", "F2 West Hallway" };
-	Room* f2nHallway = new Room("F2 North Hallway", "", exits);
+	Room* f2nHallway = new Room("F2 North Hallway", "Another hallway that leads to more dark places", exits);
 
-	exits = { "F2 North Hallway", "F2 East Hallway" };
-	Room* f2eHallway = new Room("F2 East Hallway", "", exits);
+	exits = { "F2 North Hallway", "F2 East Hallway", "MI102c" };
+	Room* f2eHallway = new Room("F2 East Hallway", "An almost enclosed space with complete darkness at the other end. I don't feel like staying here for longer than necessary...", exits);
 
-	exits = { "F2 Landing", "F2 North Hallway", "F2 Easy Hallway", "Staircase" };
-	Room* f2wHallway = new Room("F2 West Hallway", "", exits);
+	exits = { "F2 Landing", "F2 North Hallway", "MI102a", "MI102b" };
+	Room* f2wHallway = new Room("F2 West Hallway", "Another hallway. A wall of rolling cloud fills the end of the hallway. Seems impassable", exits);
 
 	// Floor 2 - Rooms
 	exits = { "F2 Landing" };
 	Room* mi102a = new Room("MI102a", "", exits);
+	Item* earthStone = new Item(EARTH_STONE);
+	mi102a->AddItem(earthStone);
 
 	Room* mi102b = new Room("MI102b", "", exits);
-	Item* Ostone = new Item("The O stone");
-	mi102b->AddItem(Ostone);
 
 	exits = { "F2 North Hallway" };
 	Room* mi102c = new Room("MI102c", "", exits);
@@ -287,6 +307,29 @@ void UpdateState(Input::Instruction usrInstruction)
 
 		// Print information of new room
 		PrintRoomInfo(*AllRooms[m_roomIndex]);
+
+		if (AllRooms[m_roomIndex]->Name == "?") {
+			// End the game as player enter's the Unknown room
+
+			DisplayInfo("As I enter the room, there is just... emptiness. A long, deafening silence.");
+			Sleep(2500);
+			DisplayInfo("...");
+			Sleep(2500);
+			DisplayInfo("...");
+			Sleep(2500);
+			DisplayInfo("...");
+			
+			Sleep(2500);
+			DisplayInfo("A silhouette appears through the emptiness. A man, holding a spear in his right hand.");
+			
+			Sleep(2500);
+			DisplayInfo("Is that.. a helmet with pointy horns?");
+
+			Sleep(5000);
+			DisplayInfo("It's Odin!");
+
+			m_playingGame = false;
+		}
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY) 
 	{
@@ -304,13 +347,36 @@ void UpdateState(Input::Instruction usrInstruction)
 		if (m_userInventory.Contains(usrInstruction.Goal)) {
 			// Check if an NPC currently being spoken to
 			if (m_currentNPCPtr == nullptr) {
-				DisplayInfo("You try to give '" + usrInstruction.Goal + "'. However, you only hear a loud clunk as the item fall to the floor.");
-				DisplayInfo("Maybe you should make sure someone is there to give the item to first?");
+
+				// Make user drop item since they're trying to GIVE before talking to NPC
+				Item* itm = m_userInventory.RemoveItem(usrInstruction.Goal);
+				AllRooms[m_roomIndex]->AddItem(itm);
+
+				DisplayInfo("You try to give '" + itm->GetName() + "'. However, you only hear a loud clunk as the item falls to the floor.");
+				DisplayInfo("Maybe you should talk to someone first before trying to give an item?");
+				InfoBuffer();
+
+				PrintRoomInfo(*AllRooms[m_roomIndex]);
 				return;
 			}
 
-			bool result = m_currentNPCPtr->GiveItem(usrInstruction.Goal);
+			bool completedNPC = m_currentNPCPtr->GiveItem(usrInstruction.Goal);
 			DisplayInfo(m_currentNPCPtr->GetSpeech());
+
+			if (completedNPC) {
+				// Remove item from inventory, only if successful
+				Item* itm = m_userInventory.RemoveItem(usrInstruction.Goal);
+				delete itm;
+
+				Item* rewardItm = m_currentNPCPtr->PopReward();
+				if (rewardItm != nullptr) {
+					// Buffer between speech of NPC and reward
+					InfoBuffer();
+					DisplayInfo("'" + m_currentNPCPtr->GetName() + "' rewards you with '" + rewardItm->GetName() + "'");
+
+					m_userInventory.AddItem(rewardItm, true);
+				}
+			}
 		} else {
 			DisplayInfo("You don't have '" + usrInstruction.Goal + "' in your inventory");
 		}
@@ -318,6 +384,25 @@ void UpdateState(Input::Instruction usrInstruction)
 		if (SpiritsHaveItems()) 
 		{
 			// ToDo: Implement Ending
+			DisplayInfo("The three spirits suddenly vanish. The endless cloud wall seems to fade away, revealing a series of doors, all leading to the same path");
+			
+			// Create room after cloud wall
+			std::vector<std::string> exits = { "Main Hall", "?" };
+			Room* finalRoom = new Room("Realm Beyond Realms", "The cloud wall revealed this room. This must lead to a way out! Surely...", exits);
+			Item* itm = new Item("Dust Pile");
+			finalRoom->AddItem(itm);
+			AllRooms.push_back(finalRoom);
+			
+			// Add new room as exit in Main Hall
+			AllRooms[0]->AddExit(finalRoom->Name);
+
+			// Create room after Realm Beyond Realms, "?"
+			exits = { };
+			Room* unknown = new Room("?", "There's just... nothing.", exits);
+			AllRooms.push_back(unknown);
+
+			PrintRoomInfo(*AllRooms[m_roomIndex]);
+			InfoBuffer();
 		}
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_TAKE) 
@@ -329,14 +414,7 @@ void UpdateState(Input::Instruction usrInstruction)
 			return;
 		}
 
-		bool contains = AllRooms[m_roomIndex]->ItemsContains(usrInstruction.Goal);
-		if (contains) {
-			Item* itmPtr = AllRooms[m_roomIndex]->RemoveItem(usrInstruction.Goal);
-			m_userInventory.AddItem(itmPtr);
-			DisplayInfo("You pick up " + itmPtr->GetName());
-		} else {
-			DisplayInfo("You tried to pick up '" + usrInstruction.Goal + "' but couldn\'t find it");
-		}
+		TryTakeItem(usrInstruction.Goal);
 	}
 	else if(usrInstruction.Function == Function::FUNCTION_DROP)
 	{
@@ -374,23 +452,26 @@ int FindRoomIndex(std::string roomName)
 
 /*	Prints out room information in the format:
 	> Room Name
+	> Room Description
 	> - - - - 
 	> Items: Itm1, Itm2
 	> Exits: Exit1, Exit2
 	> NPCs: NPC1, NPC2
 	*/
-void PrintRoomInfo(Room & r)
+void PrintRoomInfo(Room& r)
 {
 	std::string out = "";
+	std::string pre = "> ";
 
 	std::string endl = "\n";
-	out += "> " + r.Name + endl;
-	out += "> - - - - - - " + endl;
+	out += pre + pre + r.Name + endl;
+	out += pre + r.GetDescription() + endl;
+	out += pre + "- - - - - - " + endl;
 	
 	// Append items if there are any
 	int itmsSize = r.GetItemsSize();
 	if (itmsSize > 0) {
-		out += "> Items: ";
+		out += pre + "Items: ";
 		for (unsigned int i = 0; i < itmsSize; i++) {
 			out += r.GetItem(i)->GetName();
 			if (i < itmsSize - 1) {
@@ -403,7 +484,7 @@ void PrintRoomInfo(Room & r)
 	// Append exists if exists
 	int exitsSize = r.GetExitsSize();
 	if (exitsSize > 0) {
-		out += "> Exits: ";
+		out += pre + "Exits: ";
 		for (int i = 0; i < exitsSize; i++) {
 			out += r.GetExit(i);
 			if (i < exitsSize - 1)
@@ -415,7 +496,7 @@ void PrintRoomInfo(Room & r)
 	// Append NPCs if exists
 	int npcsSize= r.GetNPCSize();
 	if (npcsSize > 0) {
-		out += "> NPCs: ";
+		out += pre + "NPCs: ";
 		for (int i = 0; i < npcsSize; i++) {
 			out += r.GetNPC(i)->GetName();
 			if (i < npcsSize - 1)
@@ -470,4 +551,32 @@ bool SpiritsHaveItems()
 	}
 
 	return hasItemCount == npcSize;
+}
+
+void TryTakeItem(std::string itemName)
+{
+	bool canAdd = m_userInventory.CanAddItem();
+	if (!canAdd) {
+		DisplayInfo("You're inventory is looking a little full. Maybe you should make some space first before taking more things?");
+		return;
+	}
+
+	bool contains = AllRooms[m_roomIndex]->ItemsContains(itemName);
+	if (contains) {
+		Item* itmPtr = AllRooms[m_roomIndex]->RemoveItem(itemName);
+
+		bool hasAdded = m_userInventory.AddItem(itmPtr);
+		if (hasAdded) {
+			DisplayInfo("You pick up " + itmPtr->GetName());
+		}
+		else {
+			// Shouldn't ever get to here
+			// If you reach here, all hope is lost
+			// glhf
+			DisplayInfo("ERROR: Unable to add '" + itemName  + "' to your inventory");
+		}
+	}
+	else {
+		DisplayInfo("You tried to pick up '" + itemName + "' but couldn\'t find it");
+	}
 }

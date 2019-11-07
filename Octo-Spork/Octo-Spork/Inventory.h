@@ -13,8 +13,11 @@ public:
 	Item* GetItem(int index);
 	/* Checks if the inventory contains an item name */
 	bool Contains(std::string itmName);
-	/* Adds an item to the player's inventory */
-	void AddItem(Item* itmPtr);
+	/* Adds an item to the player's inventory. Returns if it could be added (true) or not (false) */
+	bool AddItem(Item* itmPtr);
+	/*	Adds an item to the player's inventory with the option to forceAdd to their inventory, regardless of inventory size.
+		For example, if it's a necessary item to progress with story */
+	void AddItem(Item* itmPtr, bool forceAdd);
 	/* Removes an item from the player's inventory and returns it */
 	Item* RemoveItem(std::string itmName);
 
@@ -22,6 +25,8 @@ public:
 	int GetSize();
 	/* Gets the max size of the player's inventory, maximum amount of items the player can hold*/
 	int GetMaxSize();
+	/* Can the player pick up another item? */
+	bool CanAddItem();
 
 	/* Disposes of all Items inside the inventory */
 	void Dispose();

@@ -151,3 +151,9 @@ int Room::GetExitsSize()
 {
 	return m_exits.size();
 }
+
+
+void Room::AddExit(std::string exitName)
+{
+	m_exits.push_back(exitName);
+}

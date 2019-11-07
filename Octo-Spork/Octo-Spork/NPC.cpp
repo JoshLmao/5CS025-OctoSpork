@@ -20,6 +20,7 @@ NPC::NPC()
 	m_hasRequiredItem = false;
 	m_interactCount = 0;
 	m_attemptedItem = "";
+	m_reward = nullptr;
 }
 
 NPC::NPC(NPCConfig config)
@@ -30,6 +31,7 @@ NPC::NPC(NPCConfig config)
 	m_hasRequiredItem = false;
 	m_interactCount = 0;
 	m_attemptedItem = "";
+	m_reward = nullptr;
 }
 
 std::string NPC::GetSpeech()
@@ -91,4 +93,16 @@ std::string NPC::GetName()
 bool NPC::HasRequiredItem()
 {
 	return m_hasRequiredItem;
+}
+
+void NPC::SetReward(Item* itm)
+{
+	m_reward = itm;
+}
+
+Item* NPC::PopReward()
+{
+	Item* ptr = m_reward;
+	m_reward = nullptr;
+	return ptr;
 }
