@@ -156,21 +156,24 @@ void InitBuilding()
 
 	// Ground Floor - Hallways
 	exits = { "Main Hall", "East Hallway", "MI034" };
-	Room* nHallway = new Room("North Hallway", "Long hallway", exits);
-	
+	Room* nHallway = new Room("North Hallway", "A long hallway that leads down one side of the facility", exits);
+	nHallway->AddItem(new Item("Glass Shard"));
+	nHallway->AddItem(new Item("Luden Statue"));
+
 	exits = { "North Hallway", "MI035" };
-	Room* eHallway = new Room("East Hallway", "Hidden in the back of the complex", exits);
+	Room* eHallway = new Room("East Hallway", "Hallway that takes me to the back of the complex. Seems very dark down here", exits);
+	eHallway->AddItem(new Item("Blank Paper"));
 
 	// Ground Floor - Rooms
 	// MI034
 	exits = { "North Hallway", "MI035" };
-	Room* mi034 = new Room("MI034", "A quiet little room tucked away at the back of the facility", exits);
+	Room* mi034 = new Room("MI034", "A quiet little room near the side of the facility with a ghost. Wonder how he got here...", exits);
 	mi034->AddItem(new Item("Computer Mouse"));
 	mi034->AddItem(new Item("Broken Headset"));
 	
 	NPCConfig govrConfig = NPCConfig();
 	govrConfig.Name = "Ghost of VR";
-	govrConfig.RequiredItemName = "Example Item";
+	govrConfig.RequiredItemName = "Vive Controller";
 	govrConfig.Greeting = "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?";
 	govrConfig.StandardResponse = "Please, wanderer. I have been here for 500 years now. My death is the only thing that bounds me to the realm. Can you help free me?";
 	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often? Help me or leave me be.";
@@ -186,50 +189,61 @@ void InitBuilding()
 	mi034->AddNPC(ghostVR);
 
 	// MI035
-	exits = { "East Hallway" };
-	Room* mi035 = new Room("MI035", "Description", exits);
+	exits = { "East Hallway", "MI034" };
+	Room* mi035 = new Room("MI035", "There's hardly any light in here but I can just about make out a couple things.", exits);
 	mi035->AddItem(new Item("Ominous Candle"));
-	mi035->AddItem(new Item("VR Controller"));
+	mi035->AddItem(new Item("Vive Controller"));
 
 	// Floor 1 to 2 Staircase 
-	exits = { "Main Hall", "F2 Landing" };
-	Room* staircase = new Room("Staircase", "", exits);
+	exits = { "Main Hall", "F1 Landing" };
+	Room* staircase = new Room("Staircase", "A crumbling staircase that leads upstairs. It might contain more rooms to check out", exits);
+	staircase->AddItem(new Item("Stone"));
+	staircase->AddItem(new Item("Small rock"));
 
 	// Floor 2
-	exits = { "Staircase", "F2 North Hallway", "F2 West Hallway" };
-	Room* f2Landing = new Room("F2 Landing", "A massive open space, full of old and rusted parts. From here I can see three room, all look abandoned and filled with broken glass", exits);
+	exits = { "Staircase", "F1 North Hallway", "F1 West Hallway" };
+	Room* f1Landing = new Room("F1 Landing", "A massive open space, full of old and rusted parts. From here I can see three room, all look abandoned and filled with broken glass", exits);
+	f1Landing->AddItem(new Item("Electrical Parts"));
+	f1Landing->AddItem(new Item("Lantern"));
+	f1Landing->AddItem(new Item("Empty Water Bottle"));
 
-	exits = { "F2 East Hallway", "F2 Landing", "MI102c", "F2 West Hallway" };
-	Room* f2nHallway = new Room("F2 North Hallway", "Another hallway that leads to more dark places", exits);
+	exits = { "F1 East Hallway", "F1 Landing", "MI102c", "F1 West Hallway" };
+	Room* f1nHallway = new Room("F1 North Hallway", "Another hallway that leads to more dark places", exits);
+	f1nHallway->AddItem(new Item("Splint"));
 
-	exits = { "F2 North Hallway", "F2 East Hallway", "MI102c" };
-	Room* f2eHallway = new Room("F2 East Hallway", "An almost enclosed space with complete darkness at the other end. I don't feel like staying here for longer than necessary...", exits);
-
-	exits = { "F2 Landing", "F2 North Hallway", "MI102a", "MI102b" };
-	Room* f2wHallway = new Room("F2 West Hallway", "Another hallway. A wall of rolling cloud fills the end of the hallway. Seems impassable", exits);
-
-	// Floor 2 - Rooms
-	exits = { "F2 Landing" };
-	Room* mi102a = new Room("MI102a", "", exits);
-	Item* earthStone = new Item(EARTH_STONE);
-	mi102a->AddItem(earthStone);
-
-	Room* mi102b = new Room("MI102b", "", exits);
-
-	exits = { "F2 North Hallway" };
-	Room* mi102c = new Room("MI102c", "", exits);
+	exits = { "F1 North Hallway", "F1 East Hallway", "MI102c" };
+	Room* f1eHallway = new Room("F1 East Hallway", "An almost enclosed space with complete darkness at the other end. However, there seems to be a head down there...", exits);
+	f1eHallway->AddItem(new Item("Shard of the Unknown"));
+	f1eHallway->AddItem(new Item("Empty Mug"));
+	f1eHallway->AddItem(new Item("£5 Note"));
 
 	NPCConfig headConfig = NPCConfig();
 	headConfig.Name = "Abandoned Head";
-	headConfig.RequiredItemName = "NO_ITEM";
-	headConfig.Greeting = "Ahh, nice to meet ya, fellow prisoner. NIce to see another prisoner come through. Trut me, I've been stuck here for a while now and seen plenty o' fellows.";
-	headConfig.StandardResponse = "If I were you, I'd see about convincing them spirits to let you out. Have a look around! There might be some bargaining chips you could use";
+	headConfig.RequiredItemName = "Lantern";
+	headConfig.Greeting = "Ahh, nice to meet ya, fellow prisoner. NIce to see another prisoner come through. Trut me, I've been stuck here for a while now and seen plenty o' fellows. Maybe you can help me?";
+	headConfig.StandardResponse = "If I were you, I'd see about convincing them spirits to let you out. I have a stone which might help you! Just find me a torch or something...";
 	headConfig.ExcessiveLimitCount = 5;
+	headConfig.HasItemResponse = "Ah, thank you! In return, take this. I thought it could light up the path but to no avail.";
 	headConfig.ExcessiveResponse = "I'm just a head. Stop asking me questions! You might have a body still but are you sure you have a brain?";
-	headConfig.IncorrectItemResponse = "What am I gonna do with this. I'm just a head, ya know.";
+	headConfig.IncorrectItemResponse = "What am I gonna do with this. I can barely see it!";
 
 	NPC* headNPC = new NPC(headConfig);
-	mi102c->AddNPC(headNPC);
+	headNPC->SetReward(new Item(LIGHTNING_STONE));
+	f1eHallway->AddNPC(headNPC);
+
+	exits = { "F1 Landing", "F1 North Hallway", "MI102a", "MI102b" };
+	Room* f1wHallway = new Room("F1 West Hallway", "Another hallway. A wall of rolling cloud fills the end of the hallway. Seems impassable", exits);
+
+	// Floor 2 - Rooms
+	exits = { "F1 Landing" };
+	Room* mi102a = new Room("MI102a", "A very open room, again filled with loads of broken electrical parts", exits);
+	Item* earthStone = new Item(EARTH_STONE);
+	mi102a->AddItem(earthStone);
+
+	Room* mi102b = new Room("MI102b", "You only just manage to get into the room. There", exits);
+
+	exits = { "F1 North Hallway" };
+	Room* mi102c = new Room("MI102c", "Another room populated with broken electrical parts. These parts must have been using by the facility before", exits);
 
 	// Add all rooms to Vector
 	AllRooms.push_back(mainHall);
@@ -238,8 +252,10 @@ void InitBuilding()
 	AllRooms.push_back(mi034);
 	AllRooms.push_back(mi035);
 	AllRooms.push_back(staircase);
-	AllRooms.push_back(f2Landing);
-	AllRooms.push_back(f2nHallway);
+	AllRooms.push_back(f1Landing);
+	AllRooms.push_back(f1nHallway);
+	AllRooms.push_back(f1eHallway);
+	AllRooms.push_back(f1wHallway);
 	AllRooms.push_back(mi102a);
 	AllRooms.push_back(mi102b);
 	AllRooms.push_back(mi102c);
@@ -308,8 +324,11 @@ void UpdateState(Input::Instruction usrInstruction)
 			std::string goalLower = Utils::ToLower(usrInstruction.Goal);
 			if (exitLower == goalLower)
 			{
-				m_roomIndex = FindRoomIndex(goalLower);
-				break;
+				int newIndex = FindRoomIndex(goalLower);
+				if (newIndex >= 0) {
+					m_roomIndex = newIndex;
+					break;
+				}
 			}
 		}
 
@@ -450,6 +469,7 @@ void UpdateState(Input::Instruction usrInstruction)
 	}
 }
 
+/* Finds the index of the requested room and returns it. Returns -1 if not found */
 int FindRoomIndex(std::string roomName)
 {
 	for (int i = 0; i < AllRooms.size(); i++)
@@ -460,6 +480,7 @@ int FindRoomIndex(std::string roomName)
 			return i;
 		}
 	}
+	return -1;
 }
 
 /*	Prints out room information in the format:
@@ -476,7 +497,7 @@ void PrintRoomInfo(Room& r)
 	std::string pre = "> ";
 
 	std::string endl = "\n";
-	out += pre + pre + r.Name + endl;
+	out += pre + r.Name + endl;
 	out += pre + r.GetDescription() + endl;
 	out += pre + "- - - - - - " + endl;
 	
