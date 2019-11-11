@@ -2,6 +2,7 @@
 
 int main(int arc, char* argv[])
 {
-	OctoSpork().PlayGame();
+	OctoSpork spork = OctoSpork();
+	spork.PlayGame();
 	return 0;
 }
