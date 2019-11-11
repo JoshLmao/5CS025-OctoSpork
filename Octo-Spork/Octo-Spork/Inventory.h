@@ -11,6 +11,8 @@ public:
 
 	/* Gets an item from player inventory with it's index. Returns nullptr if out of bounds */
 	Item* GetItem(int index);
+	/* Tries to get an item in the user inventory, returning nullptr if not found */
+	Item* TryGetItem(std::string name);
 	/* Checks if the inventory contains an item name */
 	bool Contains(std::string itmName);
 	/* Adds an item to the player's inventory. Returns if it could be added (true) or not (false) */

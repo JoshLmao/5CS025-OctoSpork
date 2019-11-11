@@ -90,3 +90,14 @@ bool Inventory::CanAddItem()
 {
 	return GetSize() < GetMaxSize();
 }
+
+Item* Inventory::TryGetItem(std::string name)
+{
+	for (int i = 0; i < GetSize(); i++) {
+		Item* itm = GetItem(i);
+		if (Utils::ToLowerCompare(itm->GetName(), name)) {
+			return itm;
+		}
+	}
+	return nullptr;
+}

@@ -21,10 +21,13 @@ public:
 private:
 	// Lightning stone name
 	const std::string LIGHTNING_STONE = "Lightning Stone";
+	const std::string LIGHTNING_STONE_DESCRIPTION = "A special stone, filled with lightning. I should hold onto this...";
 	// Earth stone name
 	const std::string EARTH_STONE = "Earth Stone";
+	const std::string EARTH_STONE_DESCRIPTION = "A special stone, infused with the elements of a far away planet.";
 	// Light stone name
 	const std::string LIGHT_STONE = "Light Stone";
+	const std::string LIGHT_STONE_DESCRIPTION = "A special stone, encased with protective casing to contain a bright, glowing light inside";
 
 	// All rooms containing their items
 	std::vector<Room*> m_allRooms;

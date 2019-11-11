@@ -57,6 +57,9 @@ Function Input::DetermineFunction(std::string input)
 	else if (lower.find("exit") != std::string::npos) {
 		return FUNCTION_EXIT;
 	}
+	else if (lower.find("examine") != std::string::npos) {
+		return FUNCTION_EXAMINE;
+	}
 	else {
 		return FUNCTION_NONE;
 	}

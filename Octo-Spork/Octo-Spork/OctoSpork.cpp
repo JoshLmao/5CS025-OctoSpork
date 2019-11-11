@@ -28,9 +28,9 @@ void OctoSpork::Init()
 
 #if _DEBUG
 	// Here's your cheats, ya filthy animal
-	mainHall->AddItem(new Item(LIGHTNING_STONE));
-	mainHall->AddItem(new Item(EARTH_STONE));
-	mainHall->AddItem(new Item(LIGHT_STONE));
+	mainHall->AddItem(new Item(LIGHTNING_STONE, LIGHTNING_STONE_DESCRIPTION));
+	mainHall->AddItem(new Item(EARTH_STONE, EARTH_STONE_DESCRIPTION));
+	mainHall->AddItem(new Item(LIGHT_STONE, LIGHT_STONE_DESCRIPTION));
 #endif
 
 	// One of Three Spitis, Zeus
@@ -78,19 +78,19 @@ void OctoSpork::Init()
 	// Ground Floor - Hallways
 	exits = { "Main Hall", "East Hallway", "MI034" };
 	Room* nHallway = new Room("North Hallway", "A long hallway that leads down one side of the facility", exits);
-	nHallway->AddItem(new Item("Glass Shard"));
-	nHallway->AddItem(new Item("Luden Statue"));
+	nHallway->AddItem(new Item("Glass Shard", "I should be careful with this. Don't wanna do more harm"));
+	nHallway->AddItem(new Item("Luden Statue", "Aww, isn't he a cute lil' guy"));
 
 	exits = { "North Hallway", "MI035" };
 	Room* eHallway = new Room("East Hallway", "Hallway that takes me to the back of the complex. Seems very dark down here", exits);
-	eHallway->AddItem(new Item("Blank Paper"));
+	eHallway->AddItem(new Item("Blank Paper", "A blank piece of paper, could be useful with a pen"));
 
 	// Ground Floor - Rooms
 	// MI034
 	exits = { "North Hallway", "MI035" };
 	Room* mi034 = new Room("MI034", "A quiet little room near the side of the facility with a ghost. Wonder how he got here...", exits);
-	mi034->AddItem(new Item("Computer Mouse"));
-	mi034->AddItem(new Item("Broken Headset"));
+	mi034->AddItem(new Item("Computer Mouse", "A computer mouse, used for controlling a PC"));
+	mi034->AddItem(new Item("Broken Headset", "Just a broken headset. Nothing special here"));
 
 	NPCConfig govrConfig = NPCConfig();
 	govrConfig.Name = "Ghost of VR";
@@ -104,7 +104,7 @@ void OctoSpork::Init()
 	govrConfig.ExcessiveLimitCount = 15;
 
 	NPC* ghostVR = new NPC(govrConfig);
-	Item* stone = new Item(LIGHT_STONE);
+	Item* stone = new Item(LIGHT_STONE, LIGHT_STONE_DESCRIPTION);
 	ghostVR->SetReward(stone);
 
 	mi034->AddNPC(ghostVR);
@@ -112,31 +112,31 @@ void OctoSpork::Init()
 	// MI035
 	exits = { "East Hallway", "MI034" };
 	Room* mi035 = new Room("MI035", "There's hardly any light in here but I can just about make out a couple things.", exits);
-	mi035->AddItem(new Item("Ominous Candle"));
-	mi035->AddItem(new Item("Vive Controller"));
+	mi035->AddItem(new Item("Ominous Candle", "Not sure how a candle can be ominous but, here we are."));
+	mi035->AddItem(new Item("Vive Controller", "A VR controller. Could be useful to someone who has one missing"));
 
 	// Floor 1 to 2 Staircase 
 	exits = { "Main Hall", "F1 Landing" };
 	Room* staircase = new Room("Staircase", "A crumbling staircase that leads upstairs. It might contain more rooms to check out", exits);
-	staircase->AddItem(new Item("Stone"));
-	staircase->AddItem(new Item("Small rock"));
+	staircase->AddItem(new Item("Stone", "It's a rock, nothing special"));
+	staircase->AddItem(new Item("Small rock","It's an even smaller rock. Even less special"));
 
 	// Floor 2
 	exits = { "Staircase", "F1 North Hallway", "F1 West Hallway" };
 	Room* f1Landing = new Room("F1 Landing", "A massive open space, full of old and rusted parts. From here I can see three room, all look abandoned and filled with broken glass", exits);
-	f1Landing->AddItem(new Item("Electrical Parts"));
-	f1Landing->AddItem(new Item("Lantern"));
-	f1Landing->AddItem(new Item("Empty Water Bottle"));
+	f1Landing->AddItem(new Item("Electrical Parts", "So many broken parts. Maybe these could be useful?"));
+	f1Landing->AddItem(new Item("Lantern", "Good for lighting the way."));
+	f1Landing->AddItem(new Item("Empty Water Bottle", "A water bottle, but nothing is inside."));
 
 	exits = { "F1 East Hallway", "F1 Landing", "MI102c", "F1 West Hallway" };
 	Room* f1nHallway = new Room("F1 North Hallway", "Another hallway that leads to more dark places", exits);
-	f1nHallway->AddItem(new Item("Splint"));
+	f1nHallway->AddItem(new Item("Splint", "Useless"));
 
 	exits = { "F1 North Hallway", "F1 East Hallway", "MI102c" };
 	Room* f1eHallway = new Room("F1 East Hallway", "An almost enclosed space with complete darkness at the other end. However, there seems to be a head down there...", exits);
-	f1eHallway->AddItem(new Item("Shard of the Unknown"));
-	f1eHallway->AddItem(new Item("Empty Mug"));
-	f1eHallway->AddItem(new Item("£5 Note"));
+	f1eHallway->AddItem(new Item("Shard of the Unknown", "A very creepy shard"));
+	f1eHallway->AddItem(new Item("Empty Mug", "Just an big empty mug with a logo on the side saying 'Sports Direct'"));
+	f1eHallway->AddItem(new Item("£5 Note", "A note. Seems like it's of a foreign currency. Never seen one of these before"));
 
 	NPCConfig headConfig = NPCConfig();
 	headConfig.Name = "Abandoned Head";
@@ -149,7 +149,7 @@ void OctoSpork::Init()
 	headConfig.IncorrectItemResponse = "What am I gonna do with this. I can barely see it!";
 
 	NPC* headNPC = new NPC(headConfig);
-	headNPC->SetReward(new Item(LIGHTNING_STONE));
+	headNPC->SetReward(new Item(LIGHTNING_STONE, LIGHTNING_STONE_DESCRIPTION));
 	f1eHallway->AddNPC(headNPC);
 
 	exits = { "F1 Landing", "F1 North Hallway", "MI102a", "MI102b" };
@@ -158,7 +158,7 @@ void OctoSpork::Init()
 	// Floor 2 - Rooms
 	exits = { "F1 Landing" };
 	Room* mi102a = new Room("MI102a", "A very open room, again filled with loads of broken electrical parts", exits);
-	Item* earthStone = new Item(EARTH_STONE);
+	Item* earthStone = new Item(EARTH_STONE, EARTH_STONE_DESCRIPTION);
 	mi102a->AddItem(earthStone);
 
 	Room* mi102b = new Room("MI102b", "You only just manage to get into the room. There", exits);
@@ -388,7 +388,7 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 			// Create room after cloud wall
 			std::vector<std::string> exits = { "Main Hall", "?" };
 			Room* finalRoom = new Room("Realm Beyond Realms", "The cloud wall revealed this room. This must lead to a way out! Surely...", exits);
-			Item* itm = new Item("Dust Pile");
+			Item* itm = new Item("Dust Pile", "*Acho*");
 			finalRoom->AddItem(itm);
 			m_allRooms.push_back(finalRoom);
 
@@ -435,6 +435,17 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 		Input::Instruction inst = Input::ReadUser();
 		if (inst.Function == FUNCTION_EXIT)
 			m_playingGame = false;
+	}
+	else if (usrInstruction.Function == Function::FUNCTION_EXAMINE)
+	{
+		Item* itmPtr = m_userInventory.TryGetItem(usrInstruction.Goal);
+		if (itmPtr == nullptr) {
+			DisplayInfo("You don't have '" + usrInstruction.Goal + "' in your inventory. Pick something up before examining");
+		}
+		else {
+			DisplayInfo("You examine '" + itmPtr->GetName() + "' in your inventory...");
+			DisplayInfo(itmPtr->GetName() + ": " + itmPtr->Examine());
+		}
 	}
 }
 

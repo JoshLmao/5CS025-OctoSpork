@@ -61,7 +61,7 @@ std::string NPC::GetSpeech()
 
 	// If NPC already has item and player tries to talk again
 	if (m_hasRequiredItem) {
-		return m_config.HasItemResponse;
+		return m_config.CompleteResponse;
 	}
 
 	return m_config.StandardResponse;
