@@ -2,11 +2,12 @@
 
 OctoSpork::OctoSpork()
 {
-	std::vector<Room*> AllRooms;
-	Inventory m_userInventory;
 	int m_roomIndex = 0;
 	bool m_playingGame = false;
 	NPC* m_currentNPCPtr = nullptr;
+
+	std::vector<Room*> AllRooms;
+	Inventory m_userInventory;
 }
 
 void OctoSpork::PlayGame()
