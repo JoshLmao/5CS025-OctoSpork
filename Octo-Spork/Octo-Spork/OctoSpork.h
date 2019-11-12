@@ -19,6 +19,10 @@ public:
 	/* Entry point - Call to start game */
 	void PlayGame();
 
+	const Colors ITEMS_COLOR = Colors::COLORS_GREEN;
+	const Colors NPCS_COLOR = Colors::COLORS_CYAN;
+	const Colors EXITS_COLOR = Colors::COLORS_MAGENTA;
+	const Colors DEFAULT_COLOR = Colors::COLORS_WHITE;
 
 private:
 	// Lightning stone name

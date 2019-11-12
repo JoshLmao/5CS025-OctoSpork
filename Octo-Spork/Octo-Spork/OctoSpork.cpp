@@ -133,7 +133,8 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 		}
 		else {
 			std::string speech = m_currentNPCPtr->GetSpeech();
-			DisplayInfo(speech);
+			std::string line = Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + speech;
+			DisplayInfo(line);
 		}
 	}
 	else if (usrInstruction.Function == Function::FUNCTION_ENTER)
@@ -213,7 +214,9 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 			}
 
 			bool completedNPC = m_currentNPCPtr->GiveItem(usrInstruction.Goal);
-			DisplayInfo(m_currentNPCPtr->GetSpeech());
+			std::string speech = m_currentNPCPtr->GetSpeech();
+			std::string line = Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + speech;
+			DisplayInfo(line);
 
 			if (completedNPC) {
 				// Remove item from inventory, only if successful
@@ -224,7 +227,7 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 				if (rewardItm != nullptr) {
 					// Buffer between speech of NPC and reward
 					InfoBuffer();
-					DisplayInfo("'" + m_currentNPCPtr->GetName() + "' rewards you with '" + rewardItm->GetName() + "'");
+					DisplayInfo("'" + Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "' rewards you with '" + Utils::GetColor(ITEMS_COLOR) + rewardItm->GetName() + Utils::GetColor(DEFAULT_COLOR) + "'");
 
 					m_userInventory.AddItem(rewardItm, true);
 				}
@@ -234,9 +237,7 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 			DisplayInfo("You don't have '" + usrInstruction.Goal + "' in your inventory");
 		}
 
-		if (SpiritsHaveItems())
-		{
-			// ToDo: Implement Ending
+		if (SpiritsHaveItems()) {
 			DisplayInfo("The three spirits suddenly vanish. The endless cloud wall seems to fade away, revealing a series of doors, all leading to the same path");
 
 			// Create room after cloud wall
@@ -276,7 +277,7 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 		if (contains) {
 			Item* itmPtr = m_userInventory.RemoveItem(usrInstruction.Goal);
 			m_allRooms[m_roomIndex]->AddItem(itmPtr);
-			DisplayInfo("You dropped '" + itmPtr->GetName() + "'.");
+			DisplayInfo("You dropped '" + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "'.");
 		}
 		else {
 			DisplayInfo("Can't find the item '" + usrInstruction.Goal + "' inside your inventory.");
@@ -297,7 +298,7 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 			DisplayInfo("You don't have '" + usrInstruction.Goal + "' in your inventory. Pick something up before examining");
 		}
 		else {
-			DisplayInfo("You examine '" + itmPtr->GetName() + "' in your inventory...");
+			DisplayInfo("You examine '" + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "' in your inventory...");
 			DisplayInfo(itmPtr->GetName() + ": " + itmPtr->Examine());
 		}
 	}
@@ -309,6 +310,7 @@ void OctoSpork::PrintRoomInfo(Room& r)
 	std::string pre = "> ";
 
 	std::string endl = "\n";
+	out += Utils::GetColor(DEFAULT_COLOR);
 	out += pre + r.Name + endl;
 	out += pre + r.GetDescription() + endl;
 	out += pre + "- - - - - - " + endl;
@@ -316,6 +318,7 @@ void OctoSpork::PrintRoomInfo(Room& r)
 	// Append items if there are any
 	int itmsSize = r.GetItemsSize();
 	if (itmsSize > 0) {
+		out += Utils::GetColor(ITEMS_COLOR);
 		out += pre + "Items: ";
 		for (unsigned int i = 0; i < itmsSize; i++) {
 			out += r.GetItem(i)->GetName();
@@ -329,6 +332,7 @@ void OctoSpork::PrintRoomInfo(Room& r)
 	// Append exists if exists
 	int exitsSize = r.GetExitsSize();
 	if (exitsSize > 0) {
+		out += Utils::GetColor(EXITS_COLOR);
 		out += pre + "Exits: ";
 		for (int i = 0; i < exitsSize; i++) {
 			out += r.GetExit(i);
@@ -341,6 +345,7 @@ void OctoSpork::PrintRoomInfo(Room& r)
 	// Append NPCs if exists
 	int npcsSize = r.GetNPCSize();
 	if (npcsSize > 0) {
+		out += Utils::GetColor(NPCS_COLOR);
 		out += pre + "NPCs: ";
 		for (int i = 0; i < npcsSize; i++) {
 			out += r.GetNPC(i)->GetName();
@@ -349,6 +354,8 @@ void OctoSpork::PrintRoomInfo(Room& r)
 		}
 		out += endl;
 	}
+	
+	out += Utils::GetColor(DEFAULT_COLOR);
 
 	std::cout << out;
 }
@@ -366,7 +373,9 @@ void OctoSpork::Dispose()
 void OctoSpork::PrintInventory()
 {
 	std::string msg = "";
+	
 	for (unsigned int i = 0; i < m_userInventory.GetSize(); i++) {
+		msg += Utils::GetColor(ITEMS_COLOR);
 		std::string itemName = m_userInventory.GetItem(i)->GetName();
 		if (itemName != "") {
 			msg += itemName;
@@ -375,8 +384,12 @@ void OctoSpork::PrintInventory()
 		}
 	}
 
-	if (msg == "")
+	if (msg == "") {
+		msg += Utils::GetColor(DEFAULT_COLOR);
 		msg = "You have no items in your inventory.";
+	}
+
+	msg += Utils::GetColor(DEFAULT_COLOR);
 	DisplayInfo(msg);
 }
 
@@ -409,7 +422,7 @@ void OctoSpork::TryTakeItem(std::string itemName)
 
 		bool hasAdded = m_userInventory.AddItem(itmPtr);
 		if (hasAdded) {
-			DisplayInfo("You pick up " + itmPtr->GetName());
+			DisplayInfo("You pick up " + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR));
 		}
 		else {
 			// Shouldn't ever get to here
