@@ -2,6 +2,7 @@
 #include <fstream>
 #include <streambuf>
 
+// Include RapidJson library files for deserializing Json
 #include "rapidjson\document.h"
 #include "rapidjson\writer.h"
 #include "rapidjson\stringbuffer.h"
@@ -443,6 +444,8 @@ std::string OctoSpork::ReadFile(std::string filename)
 void OctoSpork::ParseJSON(const char* json)
 {
 	// Parse text input to RapidJson objects using the RapidJson library
+	// All code inside this function comes from using the RapidJson library,
+	// which is open-source and available online (https://github.com/Tencent/rapidjson)
 	rapidjson::Document doc;
 	doc.Parse(json);
 
@@ -455,6 +458,7 @@ void OctoSpork::ParseJSON(const char* json)
 				continue;
 			}
 
+			// Parses a room object and add's it to m_allRooms
 			Room* room = new Room();
 			for (rapidjson::Value::ConstMemberIterator valItr = attribute.MemberBegin(); valItr != attribute.MemberEnd(); ++valItr) {
 				if (valItr->name.IsString()) {
