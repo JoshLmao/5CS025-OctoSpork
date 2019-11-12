@@ -9,6 +9,7 @@
 #include "Input.h"
 #include "Utils.h"
 #include "Inventory.h"
+#include "rapidjson\document.h"
 
 class OctoSpork
 {
@@ -17,6 +18,7 @@ public:
 
 	/* Entry point - Call to start game */
 	void PlayGame();
+
 
 private:
 	// Lightning stone name
@@ -46,6 +48,10 @@ private:
 	void Play();
 	/* Disposes of all created objects ready for shutdown */
 	void Dispose();
+	/* Reads a text file and returns all content */
+	std::string ReadFile(std::string filename);
+	/* Parses game data json and populates ready to play */
+	void ParseJSON(const char* json);
 
 	/* Adds an amount of new line char's specified in 'count' */
 	void InfoBuffer(int count = 1);

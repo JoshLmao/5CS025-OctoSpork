@@ -1,3 +1,11 @@
+#include <string>
+#include <fstream>
+#include <streambuf>
+
+#include "rapidjson\document.h"
+#include "rapidjson\writer.h"
+#include "rapidjson\stringbuffer.h"
+
 #include "OctoSpork.h"
 
 OctoSpork::OctoSpork()
@@ -6,8 +14,7 @@ OctoSpork::OctoSpork()
 	bool m_playingGame = false;
 	NPC* m_currentNPCPtr = nullptr;
 
-	std::vector<Room*> AllRooms;
-	Inventory m_userInventory;
+	m_allRooms = std::vector<Room*>(0);
 }
 
 void OctoSpork::PlayGame()
@@ -21,166 +28,11 @@ void OctoSpork::PlayGame()
 
 void OctoSpork::Init()
 {
-	std::vector<std::string> exits;
+	// Initialize game by reading Json file with game data and populating arrays
+	std::string data = ReadFile("resources/game.json");
+	ParseJSON(data.c_str());
 
-	// Spawn Room, Main Hall
-	exits = { "North Hallway", "Staircase" };
-	Room* mainHall = new Room("Main Hall", "Where I woke up. There's a massive sign on the wall with it's name", exits);
-
-#if _DEBUG
-	// Here's your cheats, ya filthy animal
-	mainHall->AddItem(new Item(LIGHTNING_STONE, LIGHTNING_STONE_DESCRIPTION));
-	mainHall->AddItem(new Item(EARTH_STONE, EARTH_STONE_DESCRIPTION));
-	mainHall->AddItem(new Item(LIGHT_STONE, LIGHT_STONE_DESCRIPTION));
-#endif
-
-	// One of Three Spitis, Zeus
-	NPCConfig zeusConfig = NPCConfig();
-	zeusConfig.Name = "Spirit of Zeus";
-	zeusConfig.RequiredItemName = LIGHTNING_STONE;
-	zeusConfig.Greeting = "Hello there, wanderer. I see you finally awaken from your slumber. Ready yourself, soon Odin will return to serve his punishment";
-	zeusConfig.StandardResponse = "Odin creeps ever closer. Your time here is limited. I hope this doesn't come as a 'shock' to you. Mwuahahah";
-	zeusConfig.ExcessiveLimitCount = 6;
-	zeusConfig.ExcessiveResponse = "STOP annoying me with your small talk! Do you require anything from me?";
-	zeusConfig.HasItemResponse = "Wait. No. Could it be? How did you find this? Give it here, quickly.";
-	zeusConfig.CompleteResponse = "If you find any other stones... maybe we will be lenient when Odin arrives";
-	zeusConfig.IncorrectItemResponse = "Why are you giving me this? Ugh, stop wasting my time. Odin will strike swiftly, once he arrives";
-	NPC* zeusNPC = new NPC(zeusConfig);
-	mainHall->AddNPC(zeusNPC);
-
-	// One of Three Spitis, Freya
-	NPCConfig freyaConfig = NPCConfig();
-	freyaConfig.Name = "Spirit of Freya";
-	freyaConfig.RequiredItemName = EARTH_STONE;
-	freyaConfig.Greeting = "Greetings, my child. My deepest sympothies about your situation. I wish I could do something to help, but Odin arrives soon.";
-	freyaConfig.StandardResponse = "I hope that you can find peace with yourself in your final hours. Your situation is a complicated one";
-	freyaConfig.ExcessiveLimitCount = 15;
-	freyaConfig.ExcessiveResponse = "Please stop begging me. There is nothing more I can do for you.";
-	freyaConfig.HasItemResponse = "Oh my... How did you get this?! Please hand it over. I hope for your sake that there are more for you to find";
-	freyaConfig.CompleteResponse = "Have a look around. Zeus & Baulder could be persuaded if you could do the same for them";
-	freyaConfig.IncorrectItemResponse = "No, I don't need this.";
-	NPC* freyaNPC = new NPC(freyaConfig);
-	mainHall->AddNPC(freyaNPC);
-
-	// One of Three Spitis, Baulder
-	NPCConfig baulderConfig = NPCConfig();
-	baulderConfig.Name = "Spirit of Baulder";
-	baulderConfig.RequiredItemName = LIGHT_STONE;
-	baulderConfig.Greeting = "Well, well, well. The little brat is finally awake. What's the matter? Scared of Odin's punishment? Hah, you should be. May the guardian light shine through your final hours";
-	baulderConfig.StandardResponse = "Whatd'ya want? Come to grovel to me? It 'aint gonna work.";
-	baulderConfig.ExcessiveLimitCount = 8;
-	baulderConfig.ExcessiveResponse = "Look, you 'aint getting any help from me. Go be annoying somewhere else.";
-	baulderConfig.HasItemResponse = "Oh, how shiny! Pass it 'ere.";
-	baulderConfig.CompleteResponse = "Yeah? What is it?";
-	baulderConfig.IncorrectItemResponse = "Is this meant to impress me? Well congratulations... *clap* *clap* *clap* - it didn't.";
-	NPC* baulderNPC = new NPC(baulderConfig);
-	mainHall->AddNPC(baulderNPC);
-
-	// Ground Floor - Hallways
-	exits = { "Main Hall", "East Hallway", "MI034" };
-	Room* nHallway = new Room("North Hallway", "A long hallway that leads down one side of the facility", exits);
-	nHallway->AddItem(new Item("Glass Shard", "I should be careful with this. Don't wanna do more harm"));
-	nHallway->AddItem(new Item("Luden Statue", "Aww, isn't he a cute lil' guy"));
-
-	exits = { "North Hallway", "MI035" };
-	Room* eHallway = new Room("East Hallway", "Hallway that takes me to the back of the complex. Seems very dark down here", exits);
-	eHallway->AddItem(new Item("Blank Paper", "A blank piece of paper, could be useful with a pen"));
-
-	// Ground Floor - Rooms
-	// MI034
-	exits = { "North Hallway", "MI035" };
-	Room* mi034 = new Room("MI034", "A quiet little room near the side of the facility with a ghost. Wonder how he got here...", exits);
-	mi034->AddItem(new Item("Computer Mouse", "A computer mouse, used for controlling a PC"));
-	mi034->AddItem(new Item("Broken Headset", "Just a broken headset. Nothing special here"));
-
-	NPCConfig govrConfig = NPCConfig();
-	govrConfig.Name = "Ghost of VR";
-	govrConfig.RequiredItemName = "Vive Controller";
-	govrConfig.Greeting = "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?";
-	govrConfig.StandardResponse = "Please, wanderer. I have been here for 500 years now. My death is the only thing that bounds me to the realm. Can you help free me?";
-	govrConfig.ExcessiveResponse = "Do you wish to torture me by returning so often? Help me or leave me be.";
-	govrConfig.HasItemResponse = "Ah, finally! Now I may rest in peace. I am eternally greateful. Thank you. And here, take this I found lying around";
-	govrConfig.CompleteResponse = "You have served me well. Now go, let me play VR.";
-	govrConfig.IncorrectItemResponse = "What is this? Don't waste my time with irrelevent things.";
-	govrConfig.ExcessiveLimitCount = 15;
-
-	NPC* ghostVR = new NPC(govrConfig);
-	Item* stone = new Item(LIGHT_STONE, LIGHT_STONE_DESCRIPTION);
-	ghostVR->SetReward(stone);
-
-	mi034->AddNPC(ghostVR);
-
-	// MI035
-	exits = { "East Hallway", "MI034" };
-	Room* mi035 = new Room("MI035", "There's hardly any light in here but I can just about make out a couple things.", exits);
-	mi035->AddItem(new Item("Ominous Candle", "Not sure how a candle can be ominous but, here we are."));
-	mi035->AddItem(new Item("Vive Controller", "A VR controller. Could be useful to someone who has one missing"));
-
-	// Floor 1 to 2 Staircase 
-	exits = { "Main Hall", "F1 Landing" };
-	Room* staircase = new Room("Staircase", "A crumbling staircase that leads upstairs. It might contain more rooms to check out", exits);
-	staircase->AddItem(new Item("Stone", "It's a rock, nothing special"));
-	staircase->AddItem(new Item("Small rock","It's an even smaller rock. Even less special"));
-
-	// Floor 2
-	exits = { "Staircase", "F1 North Hallway", "F1 West Hallway" };
-	Room* f1Landing = new Room("F1 Landing", "A massive open space, full of old and rusted parts. From here I can see three room, all look abandoned and filled with broken glass", exits);
-	f1Landing->AddItem(new Item("Electrical Parts", "So many broken parts. Maybe these could be useful?"));
-	f1Landing->AddItem(new Item("Lantern", "Good for lighting the way."));
-	f1Landing->AddItem(new Item("Empty Water Bottle", "A water bottle, but nothing is inside."));
-
-	exits = { "F1 East Hallway", "F1 Landing", "MI102c", "F1 West Hallway" };
-	Room* f1nHallway = new Room("F1 North Hallway", "Another hallway that leads to more dark places", exits);
-	f1nHallway->AddItem(new Item("Splint", "Useless"));
-
-	exits = { "F1 North Hallway", "F1 East Hallway", "MI102c" };
-	Room* f1eHallway = new Room("F1 East Hallway", "An almost enclosed space with complete darkness at the other end. However, there seems to be a head down there...", exits);
-	f1eHallway->AddItem(new Item("Shard of the Unknown", "A very creepy shard"));
-	f1eHallway->AddItem(new Item("Empty Mug", "Just an big empty mug with a logo on the side saying 'Sports Direct'"));
-	f1eHallway->AddItem(new Item("£5 Note", "A note. Seems like it's of a foreign currency. Never seen one of these before"));
-
-	NPCConfig headConfig = NPCConfig();
-	headConfig.Name = "Abandoned Head";
-	headConfig.RequiredItemName = "Lantern";
-	headConfig.Greeting = "Ahh, nice to meet ya, fellow prisoner. NIce to see another prisoner come through. Trut me, I've been stuck here for a while now and seen plenty o' fellows. Maybe you can help me?";
-	headConfig.StandardResponse = "If I were you, I'd see about convincing them spirits to let you out. I have a stone which might help you! Just find me a torch or something...";
-	headConfig.ExcessiveLimitCount = 5;
-	headConfig.HasItemResponse = "Ah, thank you! In return, take this. I thought it could light up the path but to no avail.";
-	headConfig.ExcessiveResponse = "I'm just a head. Stop asking me questions! You might have a body still but are you sure you have a brain?";
-	headConfig.IncorrectItemResponse = "What am I gonna do with this. I can barely see it!";
-
-	NPC* headNPC = new NPC(headConfig);
-	headNPC->SetReward(new Item(LIGHTNING_STONE, LIGHTNING_STONE_DESCRIPTION));
-	f1eHallway->AddNPC(headNPC);
-
-	exits = { "F1 Landing", "F1 North Hallway", "MI102a", "MI102b" };
-	Room* f1wHallway = new Room("F1 West Hallway", "Another hallway. A wall of rolling cloud fills the end of the hallway. Seems impassable", exits);
-
-	// Floor 2 - Rooms
-	exits = { "F1 Landing" };
-	Room* mi102a = new Room("MI102a", "A very open room, again filled with loads of broken electrical parts", exits);
-	Item* earthStone = new Item(EARTH_STONE, EARTH_STONE_DESCRIPTION);
-	mi102a->AddItem(earthStone);
-
-	Room* mi102b = new Room("MI102b", "You only just manage to get into the room. There", exits);
-
-	exits = { "F1 North Hallway" };
-	Room* mi102c = new Room("MI102c", "Another room populated with broken electrical parts. These parts must have been using by the facility before", exits);
-
-	// Add all rooms to Vector
-	m_allRooms.push_back(mainHall);
-	m_allRooms.push_back(nHallway);
-	m_allRooms.push_back(eHallway);
-	m_allRooms.push_back(mi034);
-	m_allRooms.push_back(mi035);
-	m_allRooms.push_back(staircase);
-	m_allRooms.push_back(f1Landing);
-	m_allRooms.push_back(f1nHallway);
-	m_allRooms.push_back(f1eHallway);
-	m_allRooms.push_back(f1wHallway);
-	m_allRooms.push_back(mi102a);
-	m_allRooms.push_back(mi102b);
-	m_allRooms.push_back(mi102c);
+	m_roomIndex = 0;
 }
 
 /* Begin playing Octo-Spork, main entry */
@@ -579,4 +431,88 @@ int OctoSpork::FindRoomIndex(std::string roomName)
 		}
 	}
 	return -1;
+}
+
+std::string OctoSpork::ReadFile(std::string filename)
+{
+	std::ifstream t(filename);
+	std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+	return str;
+}
+
+void OctoSpork::ParseJSON(const char* json)
+{
+	// Parse text input to RapidJson objects using the RapidJson library
+	rapidjson::Document doc;
+	doc.Parse(json);
+
+	// Parse all Rooms and their info
+	rapidjson::Value& rooms = doc["rooms"];
+	if (rooms.IsArray()) {
+		for ( rapidjson::Value::ConstValueIterator roomsItr = rooms.Begin(); roomsItr != rooms.End(); ++roomsItr ) {
+			const rapidjson::Value& attribute = *roomsItr;
+			if (!attribute.IsObject()) {
+				continue;
+			}
+
+			Room* room = new Room();
+			for (rapidjson::Value::ConstMemberIterator valItr = attribute.MemberBegin(); valItr != attribute.MemberEnd(); ++valItr) {
+				if (valItr->name.IsString()) {
+					// Get the key for the current Key/Value pair
+					std::string key = valItr->name.GetString();
+					// Check key against expected keys
+					if (key == "name") {
+						room->Name = valItr->value.GetString();
+					}
+					else if (key == "description") {
+						room->SetDescription(valItr->value.GetString());
+					}
+					else if (key == "exits") {
+						// Add all items from json to room
+						for (auto& val : valItr->value.GetArray()) {
+							room->AddExit(val.GetString());
+						}
+					}
+					else if (key == "items") {
+						for (auto& val : valItr->value.GetArray()) {
+							// Create item for room
+							auto itmName = val["name"].GetString();
+							auto itmDesc = val["description"].GetString();
+							
+							Item* itm = new Item(itmName, itmDesc);
+							room->AddItem(itm);
+						}
+					}
+					else if (key == "npcs") {
+						for (auto& val : valItr->value.GetArray()) {
+							// Add NPC from it's config 
+							NPCConfig conf = NPCConfig();
+							conf.Name = val["name"].GetString();
+							conf.RequiredItemName = val["required_item"].GetString();
+							conf.Greeting = val["greeting"].GetString();
+							conf.StandardResponse = val["standard_response"].GetString();
+							conf.ExcessiveLimitCount = val["excessive_limit_count"].GetInt();
+							conf.ExcessiveResponse = val["excessive_response"].GetString();
+							conf.HasItemResponse = val["has_item_response"].GetString();
+							conf.CompleteResponse = val["complete_response"].GetString();
+							conf.IncorrectItemResponse = val["incorrect_item_response"].GetString();
+
+							NPC* npc = new NPC(conf);
+							// Add reward item if NPC Config contains one
+							if (val.HasMember("reward_item")) {
+								auto name = val["reward_item"]["name"].GetString();
+								auto desc = val["reward_item"]["description"].GetString();
+
+								Item* reward = new Item(name, desc);
+								npc->SetReward(reward);
+							}
+							
+							room->AddNPC(npc);
+						}
+					}
+				}
+			}
+			m_allRooms.push_back(room);
+		}
+	}
 }

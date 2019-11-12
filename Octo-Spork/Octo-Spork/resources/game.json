@@ -1,0 +1,267 @@
+{
+  "rooms": [
+    {
+      "name": "Main Hall",
+      "description": "Where I woke up. There's a massive sign on the wall with it's name",
+      "exits": [
+        "North Hallway",
+        "Staircase"
+      ],
+      "npcs": [
+        {
+          "name": "Spirit Of Zeus",
+          "required_item": "Lightning Stone",
+          "greeting": "Hello there, wanderer. I see you finally awaken from your slumber. Ready yourself, soon Odin will return to serve his punishment",
+          "standard_response": "Odin creeps ever closer. Your time here is limited. I hope this doesn't come as a 'shock' to you. Mwuahahah",
+          "excessive_limit_count": 6,
+          "excessive_response": "STOP annoying me with your small talk! Do you require anything from me?",
+          "has_item_response": "Wait. No. Could it be? How did you find this? Give it here, quickly.",
+          "complete_response": "If you find any other stones... maybe we will be lenient when Odin arrives",
+          "incorrect_item_response": "Why are you giving me this? Ugh, stop wasting my time. Odin will strike swiftly, once he arrives"
+        },
+        {
+          "name": "Spirit Of Freya",
+          "required_item": "Earth Stone",
+          "greeting": "Greetings, my child. My deepest sympothies about your situation. I wish I could do something to help, but Odin arrives soon.",
+          "standard_response": "I hope that you can find peace with yourself in your final hours. Your situation is a complicated one",
+          "excessive_limit_count": 15,
+          "excessive_response": "Please stop begging me. There is nothing more I can do for you.",
+          "has_item_response": "Oh my... How did you get this?! Please hand it over. I hope for your sake that there are more for you to find",
+          "complete_response": "Have a look around. Zeus & Baulder could be persuaded if you could do the same for them",
+          "incorrect_item_response": "No, I don't need this."
+        },
+        {
+          "name": "Spirit Of Baulder",
+          "required_item": "Light Stone",
+          "greeting": "Well, well, well. The little brat is finally awake. What's the matter? Scared of Odin's punishment? Hah, you should be. May the guardian light shine through your final hours",
+          "standard_response": "Whatd'ya want? Come to grovel to me? It 'aint gonna work.",
+          "excessive_limit_count": 8,
+          "excessive_response": "Look, you 'aint getting any help from me. Go be annoying somewhere else.",
+          "has_item_response": "'Ow shiny! Pass it 'ere, boy",
+          "complete_response": "Yeah? What is it?",
+          "incorrect_item_response": "Is this meant to impress me? Well congratulations... *clap* *clap* *clap* - it didn't."
+        }
+      ]
+    },
+    {
+      "name": "North Hallway",
+      "description": "A long hallway that leads down one side of the facility",
+      "exits": [
+        "Main Hall",
+        "East Hallway",
+        "MI034"
+      ],
+      "items": [
+        {
+          "name": "Luden Statue",
+          "description": "Aww, isn't he a cute lil' guy"
+        },
+        {
+          "name": "Glass Shard",
+          "description": "I should be careful with this. Don't wanna do more harm"
+        }
+      ]
+    },
+    {
+      "name": "East Hallway",
+      "description": "Hallway that takes me to the back of the complex. Seems very dark down here",
+      "exits": [
+        "North Hallway",
+        "MI035"
+      ],
+      "items": [
+        {
+          "name": "Blank Paper",
+          "description": "A blank piece of paper, could be useful with a pen"
+        }
+      ]
+    },
+    {
+      "name": "MI034",
+      "description": "A quiet little room near the side of the facility with a ghost. Wonder how he got here...",
+      "exits": [
+        "North Hallway",
+        "MI035"
+      ],
+      "items": [
+        {
+          "name": "Computer Mouse",
+          "description": "A computer mouse, used for controlling a PC"
+        },
+        {
+          "name": "Broken Headset",
+          "description": "Just a broken headset. Nothing special here"
+        }
+      ],
+      "npcs": [
+        {
+          "name": "Ghost of VR",
+          "required_item": "Vive Controller",
+          "greeting": "Greetings wanderer. What brings you along my path? Is it the promise of loot or to free me from this cursed room?",
+          "standard_response": "Please, wanderer. I have been here for 500 years now. My death is the only thing that bounds me to the realm. Can you help free me?",
+          "excessive_limit_count": 15,
+          "excessive_response": "Do you wish to torture me by returning so often? Help me or leave me be.",
+          "has_item_response": "Ah, finally! Now I may rest in peace. I am eternally greateful. Thank you. And here, take this I found lying around",
+          "complete_response": "You have served me well. Now go, let me play VR.",
+          "incorrect_item_response": "What is this? Don't waste my time with irrelevent things.",
+          "reward_item": {
+            "name": "Light Stone",
+            "description": "A special stone, encased with protective casing to contain a bright, glowing light inside"
+          }
+        }
+      ]
+    },
+    {
+      "name": "MI035",
+      "description": "There's hardly any light in here but I can just about make out a couple things.",
+      "exits": [
+        "East Hallway",
+        "MI034"
+      ],
+      "items": [
+        {
+          "name": "Vive Controller",
+          "description": "A VR controller. Could be useful to someone who has one missing",
+          "room": "MI035"
+        },
+        {
+          "name": "Ominous Candle",
+          "description": "Not sure how a candle can be ominous but, here we are.",
+          "room": "MI035"
+        }
+      ]
+    },
+    {
+      "name": "Staircase",
+      "description": "A crumbling staircase that leads upstairs. It might contain more rooms to check out",
+      "exits": [
+        "Main Hall",
+        "F1 Landing"
+      ],
+      "items": [
+        {
+          "name": "Small rock",
+          "description": "It's an even smaller rock. Even less special"
+        },
+        {
+          "name": "Stone",
+          "description": "It's a rock, nothing special"
+        }
+      ]
+    },
+    {
+      "name": "F1 Landing",
+      "description": "A massive open space, full of old and rusted parts. From here I can see three room, all look abandoned and filled with broken glass",
+      "exits": [
+        "Staircase",
+        "F1 North Hallway",
+        "F1 West Hallway"
+      ],
+      "items": [
+        {
+          "name": "Lantern",
+          "description": "Good for lighting the way."
+        },
+        {
+          "name": "Electrical Parts",
+          "description": "So many broken parts. Maybe these could be useful?"
+        },
+        {
+          "name": "Empty Water Bottle",
+          "description": "A water bottle, but nothing is inside."
+        }
+      ]
+    },
+    {
+      "name": "F1 North Hallway",
+      "description": "Another hallway that leads to more dark places",
+      "exits": [
+        "F1 East Hallway",
+        "F1 Landing",
+        "MI102c",
+        "F1 West Hallway"
+      ],
+      "items": [
+        {
+          "name": "Splint",
+          "description": "Useless"
+        }
+      ]
+    },
+    {
+      "name": "F1 East Hallway",
+      "description": "An almost enclosed space with complete darkness at the other end. However, there seems to be a head down there...",
+      "exits": [
+        "F1 North Hallway"
+      ],
+      "items": [
+        {
+          "name": "Shard of the Unknown",
+          "description": "A very creepy shard"
+        },
+        {
+          "name": "Empty Mug",
+          "description": "Just an big empty mug with a logo on the side saying 'Sports Direct'"
+        },
+        {
+          "name": "£5 Note",
+          "description": "A note. Seems like it's of a foreign currency. Never seen one of these before"
+        }
+      ],
+      "npcs": [
+        {
+          "name": "Abandoned Head",
+          "required_item": "Lantern",
+          "greeting": "Ahh, nice to meet ya, fellow prisoner. NIce to see another prisoner come through. Trut me, I've been stuck here for a while now and seen plenty o' fellows. Maybe you can help me?",
+          "standard_response": "If I were you, I'd see about convincing them spirits to let you out. I have a stone which might help you! Just find me a torch or something...",
+          "excessive_limit_count": 7,
+          "excessive_response": "I'm just a head. Stop asking me questions! You might have a body still but are you sure you have a brain?",
+          "has_item_response": "Thank you! In return, take this. I thought it could light up the path but to no avail.",
+          "complete_response": "You have served me well. Now go, let me play VR.",
+          "incorrect_item_response": "What am I gonna do with this. I can barely see it!",
+          "reward_item": {
+            "name": "Lightning Stone",
+            "description": "A special stone, filled with lightning. I should hold onto this..."
+          }
+        }
+      ]
+    },
+    {
+      "name": "F1 West Hallway",
+      "description": "Another hallway. A wall of rolling cloud fills the end of the hallway. Seems impassable",
+      "exits": [
+        "F1 Landing",
+        "F1 North Hallway",
+        "MI102a",
+        "MI102b"
+      ]
+    },
+    {
+      "name": "MI102a",
+      "description": "A very open room, again filled with loads of broken electrical parts",
+      "exits": [
+        "F1 West Hallway"
+      ],
+      "items": [
+        {
+          "name": "Earth Stone",
+          "description": "A special stone, infused with the elements of a far away planet."
+        }
+      ]
+    },
+    {
+      "name": "MI102b",
+      "description": "You only just manage to get into the room. There's just so much junk in here it's hard to find anything useful",
+      "exits": [
+        "F1 West Hallway"
+      ]
+    },
+    {
+      "name": "MI102c",
+      "description": "Another room populated with broken electrical parts. These parts must have been using by the facility before",
+      "exits": [
+        "F1 North Hallway"
+      ]
+    }
+  ]
+}

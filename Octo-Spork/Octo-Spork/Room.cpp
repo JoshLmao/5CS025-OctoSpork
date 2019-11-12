@@ -157,3 +157,8 @@ void Room::AddExit(std::string exitName)
 {
 	m_exits.push_back(exitName);
 }
+
+void Room::SetDescription(std::string desc)
+{
+	m_description = desc;
+}

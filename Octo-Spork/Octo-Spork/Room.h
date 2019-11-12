@@ -44,6 +44,8 @@ public:
 
 	/*Gets the print out room description for the room*/
 	std::string GetDescription();
+	/* Sets the description of the room */
+	void SetDescription(std::string desc);
 
 private:
 	/* Standard description of this room */
