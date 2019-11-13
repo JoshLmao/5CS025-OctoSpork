@@ -246,6 +246,10 @@
         {
           "name": "Earth Stone",
           "description": "A special stone, infused with the elements of a far away planet."
+        },
+        {
+          "name": "Electrical Parts",
+          "description": "More useless electrical parts"
         }
       ]
     },
@@ -254,6 +258,20 @@
       "description": "You only just manage to get into the room. There's just so much junk in here it's hard to find anything useful",
       "exits": [
         "F1 West Hallway"
+      ],
+      "items": [
+        {
+          "name": "Chair",
+          "description": "A chair that used for sitting on"
+        },
+        {
+          "name": "Overgrown Plant",
+          "description": "A small potted plant that seems to have been abandoned for a while"
+        },
+        {
+          "name": "Dust Pile",
+          "description": "A massive pile of dust that you somehow manage to hold"
+        }
       ]
     },
     {

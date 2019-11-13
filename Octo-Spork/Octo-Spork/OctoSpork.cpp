@@ -77,7 +77,9 @@ void OctoSpork::Play()
 		InfoBuffer();
 	}
 
+	InfoBuffer(3);
 	DisplayInfo("Thanks for playing! Hope you enjoyed the journey");
+	InfoBuffer(3);
 }
 
 /* Adds an amount of new line char's specified in 'count' */
@@ -106,86 +108,16 @@ inline void OctoSpork::Sleep(int ms)
 
 void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 {
-	if (usrInstruction.Function == Function::FUNCTION_HELP)
-	{
-		// User asking for help
-		DisplayInfo("Help Commands");
-		DisplayInfo("help - Lists all available commands to use");
-		DisplayInfo("enter 'ROOM' - Used to move from one room to another");
-		DisplayInfo("talk 'NPC' - Talks to an NPC");
-		DisplayInfo("give 'ITEM' - Attempts to give an item to the current NPC in the room");
-		DisplayInfo("drop 'ITEM' - Drops the item in the current room");
-		DisplayInfo("take 'ITEM' - Takes an item that is inside the current room");
-		DisplayInfo("view inventory - Lists your current items you're holding");
-		DisplayInfo("view room - Lists the current room's information");
-		DisplayInfo("exit - Quit the game");
-
-		InfoBuffer();
-		DisplayInfo("Tip: Remember you can talk to NPCs multiple times for more information");
+	if (usrInstruction.Function == Function::FUNCTION_HELP) {
+		Help(usrInstruction);
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_TALK)
-	{
-		// User talking to an NPC
-		m_currentNPCPtr = m_allRooms[m_roomIndex]->GetNPC(usrInstruction.Goal);
-
-		if (m_currentNPCPtr == nullptr) {
-			DisplayInfo("There is no one here named '" + usrInstruction.Goal + "'.");
-		}
-		else {
-			std::string speech = m_currentNPCPtr->GetSpeech();
-			std::string line = Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + speech;
-			DisplayInfo(line);
-		}
+	else if (usrInstruction.Function == Function::FUNCTION_TALK) {
+		Talk(usrInstruction);
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_ENTER)
-	{
-		// User enters new room
-		for (int i = 0; i < m_allRooms[m_roomIndex]->GetExitsSize(); i++)
-		{
-			std::string exitLower = Utils::ToLower(m_allRooms[m_roomIndex]->GetExit(i));
-			std::string goalLower = Utils::ToLower(usrInstruction.Goal);
-			if (exitLower == goalLower)
-			{
-				int newIndex = FindRoomIndex(goalLower);
-				if (newIndex >= 0) {
-					m_roomIndex = newIndex;
-					break;
-				}
-			}
-		}
-
-		// Reset current talking to NPC since user changed room
-		if (m_currentNPCPtr != nullptr)
-			m_currentNPCPtr = nullptr;
-
-		// Print information of new room
-		PrintRoomInfo(*m_allRooms[m_roomIndex]);
-
-		if (m_allRooms[m_roomIndex]->Name == "?") {
-			// End the game as player enter's the Unknown room
-
-			DisplayInfo("As I enter the room, there is just... emptiness. A long, deafening silence.");
-			Sleep(2500);
-			DisplayInfo("...");
-			Sleep(2500);
-			DisplayInfo("...");
-			Sleep(2500);
-			DisplayInfo("...");
-
-			Sleep(2500);
-			DisplayInfo("A silhouette appears through the emptiness. A man, holding a spear in his right hand.");
-
-			Sleep(2500);
-			DisplayInfo("Is that.. a helmet with pointy horns?");
-
-			Sleep(5000);
-			DisplayInfo("It's Odin!");
-
-			m_playingGame = false;
-		}
+	else if (usrInstruction.Function == Function::FUNCTION_ENTER) {
+		Enter(usrInstruction);
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY)
-	{
+	else if (usrInstruction.Function == Function::FUNCTION_VIEW_INVENTORY) {
 		// User viewing their inventory
 		DisplayInfo("You look through your belongings...");
 		PrintInventory();
@@ -194,113 +126,34 @@ void OctoSpork::UpdateState(Input::Instruction usrInstruction)
 		// Print the room info to the user
 		PrintRoomInfo(*m_allRooms[m_roomIndex]);
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_GIVE)
-	{
-		// User wants to give an item to the current NPC
-		if (m_userInventory.Contains(usrInstruction.Goal)) {
-			// Check if an NPC currently being spoken to
-			if (m_currentNPCPtr == nullptr) {
-
-				// Make user drop item since they're trying to GIVE before talking to NPC
-				Item* itm = m_userInventory.RemoveItem(usrInstruction.Goal);
-				m_allRooms[m_roomIndex]->AddItem(itm);
-
-				DisplayInfo("You try to give '" + itm->GetName() + "'. However, you only hear a loud clunk as the item falls to the floor.");
-				DisplayInfo("Maybe you should talk to someone first before trying to give an item?");
-				InfoBuffer();
-
-				PrintRoomInfo(*m_allRooms[m_roomIndex]);
-				return;
-			}
-
-			bool completedNPC = m_currentNPCPtr->GiveItem(usrInstruction.Goal);
-			std::string speech = m_currentNPCPtr->GetSpeech();
-			std::string line = Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + speech;
-			DisplayInfo(line);
-
-			if (completedNPC) {
-				// Remove item from inventory, only if successful
-				Item* itm = m_userInventory.RemoveItem(usrInstruction.Goal);
-				delete itm;
-
-				Item* rewardItm = m_currentNPCPtr->PopReward();
-				if (rewardItm != nullptr) {
-					// Buffer between speech of NPC and reward
-					InfoBuffer();
-					DisplayInfo("'" + Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "' rewards you with '" + Utils::GetColor(ITEMS_COLOR) + rewardItm->GetName() + Utils::GetColor(DEFAULT_COLOR) + "'");
-
-					m_userInventory.AddItem(rewardItm, true);
-				}
-			}
-		}
-		else {
-			DisplayInfo("You don't have '" + usrInstruction.Goal + "' in your inventory");
-		}
-
+	else if (usrInstruction.Function == Function::FUNCTION_GIVE) {
+		Give(usrInstruction);
+		
+		// Check if Main Hall spirits have the required items to activate last 2 rooms
 		if (SpiritsHaveItems()) {
-			DisplayInfo("The three spirits suddenly vanish. The endless cloud wall seems to fade away, revealing a series of doors, all leading to the same path");
-
-			// Create room after cloud wall
-			std::vector<std::string> exits = { "Main Hall", "?" };
-			Room* finalRoom = new Room("Realm Beyond Realms", "The cloud wall revealed this room. This must lead to a way out! Surely...", exits);
-			Item* itm = new Item("Dust Pile", "*Acho*");
-			finalRoom->AddItem(itm);
-			m_allRooms.push_back(finalRoom);
-
-			// Add new room as exit in Main Hall
-			m_allRooms[0]->AddExit(finalRoom->Name);
-
-			// Create room after Realm Beyond Realms, "?"
-			exits = { };
-			Room* unknown = new Room("?", "There's just... nothing.", exits);
-			m_allRooms.push_back(unknown);
-
-			PrintRoomInfo(*m_allRooms[m_roomIndex]);
+			ActivateFinalRooms();
+			
 			InfoBuffer();
+			DisplayInfo("The three spirits suddenly vanish. The endless cloud wall seems to fade away, revealing a series of doors, all leading to the same path");
+			InfoBuffer();
+			PrintRoomInfo(*m_allRooms[m_roomIndex]);
 		}
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_TAKE)
-	{
-		// User picks up an item. 
-		int size = m_allRooms[m_roomIndex]->GetItemsSize();
-		if (size <= 0) {
-			DisplayInfo("There are no items here.");
-			return;
-		}
-
-		TryTakeItem(usrInstruction.Goal);
+	else if (usrInstruction.Function == Function::FUNCTION_TAKE) {
+		Take(usrInstruction);
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_DROP)
-	{
-		// User wants to drop an item
-		bool contains = m_userInventory.Contains(usrInstruction.Goal);
-		if (contains) {
-			Item* itmPtr = m_userInventory.RemoveItem(usrInstruction.Goal);
-			m_allRooms[m_roomIndex]->AddItem(itmPtr);
-			DisplayInfo("You dropped '" + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "'.");
-		}
-		else {
-			DisplayInfo("Can't find the item '" + usrInstruction.Goal + "' inside your inventory.");
-		}
+	else if (usrInstruction.Function == Function::FUNCTION_DROP) {
+		Drop(usrInstruction);
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_EXIT)
-	{
+	else if (usrInstruction.Function == Function::FUNCTION_EXIT) {
 		// User wants to exit game. Confirm and quit if so
 		DisplayInfo("Are you sure you wish to quit? Type 'exit' again to confirm");
 		Input::Instruction inst = Input::ReadUser();
 		if (inst.Function == FUNCTION_EXIT)
 			m_playingGame = false;
 	}
-	else if (usrInstruction.Function == Function::FUNCTION_EXAMINE)
-	{
-		Item* itmPtr = m_userInventory.TryGetItem(usrInstruction.Goal);
-		if (itmPtr == nullptr) {
-			DisplayInfo("You don't have '" + usrInstruction.Goal + "' in your inventory. Pick something up before examining");
-		}
-		else {
-			DisplayInfo("You examine '" + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "' in your inventory...");
-			DisplayInfo(itmPtr->GetName() + ": " + itmPtr->Examine());
-		}
+	else if (usrInstruction.Function == Function::FUNCTION_EXAMINE) {
+		Examine(usrInstruction);
 	}
 }
 
@@ -318,8 +171,7 @@ void OctoSpork::PrintRoomInfo(Room& r)
 	// Append items if there are any
 	int itmsSize = r.GetItemsSize();
 	if (itmsSize > 0) {
-		out += Utils::GetColor(ITEMS_COLOR);
-		out += pre + "Items: ";
+		out += pre + Utils::GetColor(ITEMS_COLOR) + "Items: ";
 		for (unsigned int i = 0; i < itmsSize; i++) {
 			out += r.GetItem(i)->GetName();
 			if (i < itmsSize - 1) {
@@ -327,32 +179,33 @@ void OctoSpork::PrintRoomInfo(Room& r)
 			}
 		}
 		out += endl;
+		out += Utils::GetColor(DEFAULT_COLOR);
 	}
 
 	// Append exists if exists
 	int exitsSize = r.GetExitsSize();
 	if (exitsSize > 0) {
-		out += Utils::GetColor(EXITS_COLOR);
-		out += pre + "Exits: ";
+		out += pre + Utils::GetColor(EXITS_COLOR) + "Exits: ";
 		for (int i = 0; i < exitsSize; i++) {
 			out += r.GetExit(i);
 			if (i < exitsSize - 1)
 				out += ", ";
 		}
 		out += endl;
+		out += Utils::GetColor(DEFAULT_COLOR);
 	}
 
 	// Append NPCs if exists
 	int npcsSize = r.GetNPCSize();
 	if (npcsSize > 0) {
-		out += Utils::GetColor(NPCS_COLOR);
-		out += pre + "NPCs: ";
+		out += pre + Utils::GetColor(NPCS_COLOR) + "NPCs: ";
 		for (int i = 0; i < npcsSize; i++) {
 			out += r.GetNPC(i)->GetName();
 			if (i < npcsSize - 1)
 				out += ", ";
 		}
 		out += endl;
+		out += Utils::GetColor(DEFAULT_COLOR);
 	}
 	
 	out += Utils::GetColor(DEFAULT_COLOR);
@@ -379,7 +232,7 @@ void OctoSpork::PrintInventory()
 		std::string itemName = m_userInventory.GetItem(i)->GetName();
 		if (itemName != "") {
 			msg += itemName;
-			if (i < m_userInventory.GetMaxSize() - 2)
+			if (i < m_userInventory.GetMaxSize() - 1)
 				msg += ",";
 		}
 	}
@@ -406,34 +259,6 @@ bool OctoSpork::SpiritsHaveItems()
 	}
 
 	return hasItemCount == npcSize;
-}
-
-void OctoSpork::TryTakeItem(std::string itemName)
-{
-	bool canAdd = m_userInventory.CanAddItem();
-	if (!canAdd) {
-		DisplayInfo("You're inventory is looking a little full. Maybe you should make some space first before taking more things?");
-		return;
-	}
-
-	bool contains = m_allRooms[m_roomIndex]->ItemsContains(itemName);
-	if (contains) {
-		Item* itmPtr = m_allRooms[m_roomIndex]->RemoveItem(itemName);
-
-		bool hasAdded = m_userInventory.AddItem(itmPtr);
-		if (hasAdded) {
-			DisplayInfo("You pick up " + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR));
-		}
-		else {
-			// Shouldn't ever get to here
-			// If you reach here, all hope is lost
-			// glhf
-			DisplayInfo("ERROR: Unable to add '" + itemName + "' to your inventory");
-		}
-	}
-	else {
-		DisplayInfo("You tried to pick up '" + itemName + "' but couldn\'t find it");
-	}
 }
 
 int OctoSpork::FindRoomIndex(std::string roomName)
@@ -532,4 +357,214 @@ void OctoSpork::ParseJSON(const char* json)
 			m_allRooms.push_back(room);
 		}
 	}
+}
+
+void OctoSpork::Help(Input::Instruction instruction)
+{
+	// User asking for help
+	DisplayInfo("Help Commands");
+	DisplayInfo("help - Lists all available commands to use");
+	DisplayInfo("enter 'ROOM' - Used to move from one room to another");
+	DisplayInfo("talk 'NPC' - Talks to an NPC");
+	DisplayInfo("give 'ITEM' - Attempts to give an item to the current NPC in the room");
+	DisplayInfo("drop 'ITEM' - Drops the item in the current room");
+	DisplayInfo("take 'ITEM' - Takes an item that is inside the current room");
+	DisplayInfo("view inventory - Lists your current items you're holding");
+	DisplayInfo("view room - Lists the current room's information");
+	DisplayInfo("exit - Quit the game");
+
+	InfoBuffer();
+	DisplayInfo("Tip: Remember you can talk to NPCs multiple times for more information");
+}
+
+void OctoSpork::Talk(Input::Instruction instruction)
+{
+	// User talking to an NPC
+	m_currentNPCPtr = m_allRooms[m_roomIndex]->GetNPC(instruction.Goal);
+
+	if (m_currentNPCPtr == nullptr) {
+		DisplayInfo("There is no one here named '" + instruction.Goal + "'.");
+	}
+	else {
+		std::string speech = m_currentNPCPtr->GetSpeech();
+		std::string line = Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + speech;
+		DisplayInfo(line);
+	}
+}
+
+void OctoSpork::Enter(Input::Instruction instruction)
+{
+	// User enters new room
+	for (int i = 0; i < m_allRooms[m_roomIndex]->GetExitsSize(); i++)
+	{
+		std::string exitLower = Utils::ToLower(m_allRooms[m_roomIndex]->GetExit(i));
+		std::string goalLower = Utils::ToLower(instruction.Goal);
+		if (exitLower == goalLower)
+		{
+			int newIndex = FindRoomIndex(goalLower);
+			if (newIndex >= 0) {
+				m_roomIndex = newIndex;
+				break;
+			}
+		}
+	}
+
+	// Reset current talking to NPC since user changed room
+	if (m_currentNPCPtr != nullptr)
+		m_currentNPCPtr = nullptr;
+
+	// Print information of new room
+	PrintRoomInfo(*m_allRooms[m_roomIndex]);
+
+	if (m_allRooms[m_roomIndex]->Name == "?") {
+		// End the game as player enter's the Unknown room
+
+		DisplayInfo("As I enter the room, there is just... emptiness. A long, deafening silence.");
+		Sleep(2500);
+		DisplayInfo("...");
+		Sleep(2500);
+		DisplayInfo("...");
+		Sleep(2500);
+		DisplayInfo("...");
+
+		Sleep(2500);
+		DisplayInfo("A silhouette appears through the emptiness. A man, holding a spear in his right hand.");
+
+		Sleep(2500);
+		DisplayInfo("Is that.." + Utils::GetColor(Colors::COLORS_RED) + "a helmet with pointy horns" + Utils::GetColor(DEFAULT_COLOR) + "?");
+
+		Sleep(5000);
+		DisplayInfo("It's" + Utils::GetColor(Colors::COLORS_RED) + " Odin" + Utils::GetColor(DEFAULT_COLOR) + "!");
+
+		m_playingGame = false;
+	}
+}
+
+void OctoSpork::Give(Input::Instruction instruction)
+{
+	// User wants to give an item to the current NPC
+	if (m_userInventory.Contains(instruction.Goal)) {
+		// Check if an NPC currently being spoken to
+		if (m_currentNPCPtr == nullptr) {
+
+			// Make user drop item since they're trying to GIVE before talking to NPC
+			Item* itm = m_userInventory.RemoveItem(instruction.Goal);
+			m_allRooms[m_roomIndex]->AddItem(itm);
+
+			DisplayInfo("You try to give '" + itm->GetName() + "'. However, you only hear a loud clunk as the item falls to the floor.");
+			DisplayInfo("Maybe you should talk to someone first before trying to give an item?");
+			InfoBuffer();
+
+			PrintRoomInfo(*m_allRooms[m_roomIndex]);
+			return;
+		}
+
+		bool completedNPC = m_currentNPCPtr->GiveItem(instruction.Goal);
+		std::string speech = m_currentNPCPtr->GetSpeech();
+		std::string line = Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + speech;
+		DisplayInfo(line);
+
+		if (completedNPC) {
+			// Remove item from inventory, only if successful
+			Item* itm = m_userInventory.RemoveItem(instruction.Goal);
+			delete itm;
+
+			Item* rewardItm = m_currentNPCPtr->PopReward();
+			if (rewardItm != nullptr) {
+				// Buffer between speech of NPC and reward
+				InfoBuffer();
+				DisplayInfo("'" + Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "' rewards you with '" + Utils::GetColor(ITEMS_COLOR) + rewardItm->GetName() + Utils::GetColor(DEFAULT_COLOR) + "'");
+
+				m_userInventory.AddItem(rewardItm, true);
+			}
+		}
+	}
+	else {
+		DisplayInfo("You don't have '" + instruction.Goal + "' in your inventory");
+	}
+}
+
+void OctoSpork::Take(Input::Instruction instruction)
+{
+	// User picks up an item. 
+	int size = m_allRooms[m_roomIndex]->GetItemsSize();
+	if (size <= 0) {
+		DisplayInfo("There are no items here.");
+		return;
+	}
+
+	TryTakeItem(instruction.Goal);
+}
+
+void OctoSpork::TryTakeItem(std::string itemName)
+{
+	bool canAdd = m_userInventory.CanAddItem();
+	if (!canAdd) {
+		DisplayInfo("You're inventory is looking a little full. Maybe you should make some space first before taking more things?");
+		return;
+	}
+
+	bool contains = m_allRooms[m_roomIndex]->ItemsContains(itemName);
+	if (contains) {
+		Item* itmPtr = m_allRooms[m_roomIndex]->RemoveItem(itemName);
+
+		bool hasAdded = m_userInventory.AddItem(itmPtr);
+		if (hasAdded) {
+			DisplayInfo("You pick up " + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR));
+		}
+		else {
+			// Shouldn't ever get to here
+			// If you reach here, all hope is lost
+			// glhf
+			DisplayInfo("ERROR: Unable to add '" + itemName + "' to your inventory");
+		}
+	}
+	else {
+		DisplayInfo("You tried to pick up '" + itemName + "' but couldn\'t find it");
+	}
+}
+
+void OctoSpork::Drop(Input::Instruction instruction)
+{
+	// User wants to drop an item
+	bool contains = m_userInventory.Contains(instruction.Goal);
+	if (contains) {
+		Item* itmPtr = m_userInventory.RemoveItem(instruction.Goal);
+		m_allRooms[m_roomIndex]->AddItem(itmPtr);
+		DisplayInfo("You dropped '" + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "'.");
+	}
+	else {
+		DisplayInfo("Can't find the item '" + instruction.Goal + "' inside your inventory.");
+	}
+}
+
+void OctoSpork::Examine(Input::Instruction instruction)
+{
+	Item* itmPtr = m_userInventory.TryGetItem(instruction.Goal);
+	if (itmPtr == nullptr) {
+		DisplayInfo("You don't have '" + instruction.Goal + "' in your inventory. Pick something up before examining");
+	}
+	else {
+		DisplayInfo("You examine '" + Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + "' in your inventory...");
+		DisplayInfo(Utils::GetColor(ITEMS_COLOR) + itmPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + itmPtr->Examine());
+	}
+}
+
+
+void OctoSpork::ActivateFinalRooms()
+{
+	// Create room after cloud wall
+	std::vector<std::string> exits = { "Main Hall", "?" };
+	Room* finalRoom = new Room("Realm Beyond Realms", "The cloud wall revealed this room. This must lead to a way out! Surely...", exits);
+	Item* itm = new Item("Dust Pile", "*Acho*");
+	finalRoom->AddItem(itm);
+	m_allRooms.push_back(finalRoom);
+
+	// Add new room as exit in Main Hall
+	m_allRooms[0]->AddExit(finalRoom->Name);
+
+	// Create room after Realm Beyond Realms, "?"
+	exits = { };
+	Room* unknown = new Room("?", "There's just... nothing.", exits);
+	m_allRooms.push_back(unknown);
 }

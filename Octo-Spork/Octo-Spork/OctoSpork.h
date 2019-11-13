@@ -25,16 +25,6 @@ public:
 	const Colors DEFAULT_COLOR = Colors::COLORS_WHITE;
 
 private:
-	// Lightning stone name
-	const std::string LIGHTNING_STONE = "Lightning Stone";
-	const std::string LIGHTNING_STONE_DESCRIPTION = "A special stone, filled with lightning. I should hold onto this...";
-	// Earth stone name
-	const std::string EARTH_STONE = "Earth Stone";
-	const std::string EARTH_STONE_DESCRIPTION = "A special stone, infused with the elements of a far away planet.";
-	// Light stone name
-	const std::string LIGHT_STONE = "Light Stone";
-	const std::string LIGHT_STONE_DESCRIPTION = "A special stone, encased with protective casing to contain a bright, glowing light inside";
-
 	// All rooms containing their items
 	std::vector<Room*> m_allRooms;
 	// The user's inventory
@@ -52,6 +42,25 @@ private:
 	void Play();
 	/* Disposes of all created objects ready for shutdown */
 	void Dispose();
+
+	/* Displays help for using Octo-Spork, shows all accepted commands */
+	void Help(Input::Instruction instruction);
+	/* Talks to a NPC in the current room */
+	void Talk(Input::Instruction instruction);
+	/* Enters a new room through one of the current room's exits */
+	void Enter(Input::Instruction instruction);
+	/* Gives an item to the current NPC player is speaking with */
+	void Give(Input::Instruction instruction);
+	/* Takes an item from the current room */
+	void Take(Input::Instruction instruction);
+	/* Drops an item from the users inventory if they have it */
+	void Drop(Input::Instruction instruction);
+	/* Examines an item in the user's inventory */
+	void Examine(Input::Instruction instruction);
+
+	/* Adds the final two rooms required to finish the game */
+	void ActivateFinalRooms();
+
 	/* Reads a text file and returns all content */
 	std::string ReadFile(std::string filename);
 	/* Parses game data json and populates ready to play */
