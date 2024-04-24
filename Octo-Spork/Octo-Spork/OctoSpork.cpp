@@ -182,7 +182,7 @@ void OctoSpork::PrintRoomInfo(Room& r)
 		out += Utils::GetColor(DEFAULT_COLOR);
 	}
 
-	// Append exists if exists
+	// Append exits if exists
 	int exitsSize = r.GetExitsSize();
 	if (exitsSize > 0) {
 		out += pre + Utils::GetColor(EXITS_COLOR) + "Exits: ";
@@ -459,12 +459,12 @@ void OctoSpork::Give(Input::Instruction instruction)
 			return;
 		}
 
-		bool completedNPC = m_currentNPCPtr->GiveItem(instruction.Goal);
+		bool successfullyGiven = m_currentNPCPtr->GiveItem(instruction.Goal);
 		std::string speech = m_currentNPCPtr->GetSpeech();
 		std::string line = Utils::GetColor(NPCS_COLOR) + m_currentNPCPtr->GetName() + Utils::GetColor(DEFAULT_COLOR) + ": " + speech;
 		DisplayInfo(line);
 
-		if (completedNPC) {
+		if (successfullyGiven) {
 			// Remove item from inventory, only if successful
 			Item* itm = m_userInventory.RemoveItem(instruction.Goal);
 			delete itm;
