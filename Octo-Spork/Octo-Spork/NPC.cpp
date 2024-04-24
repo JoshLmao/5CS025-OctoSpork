@@ -70,7 +70,7 @@ std::string NPC::GetSpeech()
 bool NPC::GiveItem(std::string itemName)
 {
 	if (m_hasRequiredItem)
-		return true;
+		return false;
 
 	m_attemptedItem = itemName;
 	if (Utils::ToLowerCompare(m_attemptedItem, m_config.RequiredItemName)) {
